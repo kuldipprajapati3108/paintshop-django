@@ -1,0 +1,235 @@
+{% extends "adminpanel/base_admin.html" %}
+{% block title %}Manage Delivery — Order #{{ order.order_id }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Manage Delivery — <span style="color:var(--primary);">Order #{{ order.order_id }}</span></h2>
+    <div class="breadcrumb-sub">
+      <a href="{% url 'admin_dashboard' %}" style="color:var(--text-muted);text-decoration:none;">Dashboard</a>
+      <span style="margin:0 6px;color:var(--text-muted);">›</span>
+      <a href="{% url 'admin_deliveries' %}" style="color:var(--text-muted);text-decoration:none;">Deliveries</a>
+      <span style="margin:0 6px;color:var(--text-muted);">›</span>
+      Order #{{ order.order_id }}
+    </div>
+  </div>
+  <a href="{% url 'admin_deliveries' %}" class="btn-action" style="background:var(--bg-card);color:var(--text);border:1.5px solid var(--border);">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;">
+
+  <!-- ══ LEFT — Order details ══ -->
+  <div>
+
+    <!-- Customer info -->
+    <div class="panel-card" style="margin-bottom:20px;">
+      <div class="panel-card-header">
+        <h5><i class="bi bi-person-circle"></i> Customer</h5>
+      </div>
+      <div class="panel-card-body">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Name</div>
+            <div style="font-weight:700;">{{ order.customer.cust_name }}</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Phone</div>
+            <div>{{ order.customer.phone }}</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Email</div>
+            <div style="font-size:.85rem;">{{ order.customer.email }}</div>
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Delivery Address</div>
+          <div style="background:var(--bg-body);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:.88rem;">
+            {{ order.customer.address|default:"No address on file" }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order items -->
+    <div class="panel-card" style="margin-bottom:20px;">
+      <div class="panel-card-header">
+        <h5><i class="bi bi-cart3"></i> Order Items</h5>
+        <span style="font-size:.8rem;color:var(--text-muted);">Placed {{ order.order_date|date:"d M Y, H:i" }}</span>
+      </div>
+      <div class="panel-card-body" style="padding:0;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Color</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              <td style="font-weight:600;">{{ item.product.product_name }}</td>
+              <td>
+                {% if item.color %}
+                  <span style="display:inline-flex;align-items:center;gap:6px;">
+                    <span style="width:14px;height:14px;border-radius:50%;background:{{ item.color.color_code }};border:1.5px solid var(--border);display:inline-block;"></span>
+                    {{ item.color.color_name }}
+                  </span>
+                {% else %}—{% endif %}
+              </td>
+              <td style="text-align:center;">{{ item.quantity }}</td>
+              <td>₹{{ item.price }}</td>
+              <td style="font-weight:700;color:var(--primary);">₹{{ item.subtotal }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr style="background:var(--bg-body);">
+              <td colspan="4" style="text-align:right;font-weight:800;padding:12px 16px;">Total</td>
+              <td style="font-weight:900;color:var(--primary);font-size:1.05rem;padding:12px 16px;">₹{{ total }}</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+
+    <!-- Payment info -->
+    <div class="panel-card">
+      <div class="panel-card-header"><h5><i class="bi bi-credit-card"></i> Payment</h5></div>
+      <div class="panel-card-body">
+        {% if payment %}
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Method</div>
+            <div style="font-weight:600;">{{ payment.get_payment_method_display }}</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Status</div>
+            <span class="badge-status badge-{{ payment.status }}">{{ payment.get_status_display }}</span>
+          </div>
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Amount</div>
+            <div style="font-weight:700;color:var(--primary);">₹{{ payment.amount }}</div>
+          </div>
+          <div>
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:4px;">Date</div>
+            <div style="font-size:.85rem;">{{ payment.payment_date|date:"d M Y" }}</div>
+          </div>
+        </div>
+        {% if payment.razorpay_payment_id %}
+        <div style="margin-top:12px;font-size:.75rem;color:var(--text-muted);">
+          Razorpay ID: <span style="font-family:monospace;">{{ payment.razorpay_payment_id }}</span>
+        </div>
+        {% endif %}
+        {% else %}
+        <p style="color:var(--text-muted);margin:0;">No payment record found.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ══ RIGHT — Delivery management form ══ -->
+  <div>
+    <div class="panel-card" style="position:sticky;top:70px;">
+      <div class="panel-card-header">
+        <h5><i class="bi bi-truck"></i> Delivery Settings</h5>
+      </div>
+      <div class="panel-card-body">
+        <form method="post">
+          {% csrf_token %}
+
+          <!-- Delivery Status -->
+          <div style="margin-bottom:18px;">
+            <label style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);display:block;margin-bottom:6px;">
+              Delivery Status
+            </label>
+            <select name="delivery_status" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-body);color:var(--text);font-size:.9rem;outline:none;">
+              {% for val, label in status_choices %}
+              <option value="{{ val }}" {% if delivery.delivery_status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Order Status -->
+          <div style="margin-bottom:18px;">
+            <label style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);display:block;margin-bottom:6px;">
+              Order Status
+            </label>
+            <select name="order_status" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-body);color:var(--text);font-size:.9rem;outline:none;">
+              {% for val, label in order_status_choices %}
+              <option value="{{ val }}" {% if order.status == val %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Assign Delivery Staff -->
+          <div style="margin-bottom:18px;">
+            <label style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);display:block;margin-bottom:6px;">
+              Assign Delivery Staff
+            </label>
+            <select name="staff_id" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-body);color:var(--text);font-size:.9rem;outline:none;">
+              <option value="">— Unassigned —</option>
+              {% for s in staff_list %}
+              <option value="{{ s.staff_id }}"
+                {% if delivery.staff and delivery.staff.staff_id == s.staff_id %}selected{% endif %}>
+                {{ s.full_name }}
+                {% if s.availability_status == 'available' %}✓{% elif s.availability_status == 'working' %}(working){% else %}(on leave){% endif %}
+              </option>
+              {% endfor %}
+            </select>
+            {% if not staff_list %}
+            <div style="margin-top:6px;font-size:.75rem;color:#ef4444;">
+              No delivery staff found. <a href="/admin_panel/staff/add/">Add staff →</a>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Delivery Date -->
+          <div style="margin-bottom:24px;">
+            <label style="font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);display:block;margin-bottom:6px;">
+              Delivery Date
+            </label>
+            <input type="date" name="delivery_date"
+              value="{{ delivery.delivery_date|date:'Y-m-d'|default:'' }}"
+              style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg-body);color:var(--text);font-size:.9rem;outline:none;">
+          </div>
+
+          <button type="submit" class="btn-action add" style="width:100%;padding:12px;font-size:.95rem;justify-content:center;">
+            <i class="bi bi-check-lg"></i> Save Changes
+          </button>
+        </form>
+
+        <!-- Current summary -->
+        <div style="margin-top:20px;padding:14px;background:var(--bg-body);border-radius:10px;border:1.5px solid var(--border);">
+          <div style="font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted);margin-bottom:10px;">Current Status</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.85rem;">
+            <span style="color:var(--text-muted);">Delivery</span>
+            <span class="badge-status
+              {% if delivery.delivery_status == 'delivered' %}badge-completed
+              {% elif delivery.delivery_status == 'failed' %}badge-cancelled
+              {% elif delivery.delivery_status == 'pending' %}badge-pending
+              {% endif %}">
+              {{ delivery.get_delivery_status_display }}
+            </span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:.85rem;">
+            <span style="color:var(--text-muted);">Order</span>
+            <span class="badge-status badge-{{ order.status }}">{{ order.get_status_display }}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.85rem;">
+            <span style="color:var(--text-muted);">Staff</span>
+            <span style="font-weight:600;">{{ delivery.staff.full_name|default:"Not assigned" }}</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,161 @@
+{% extends 'staff/base_staff.html' %}
+{% load static %}
+{% block title %}My Deliveries — Staff Panel{% endblock %}
+{% block header_title %}My Deliveries{% endblock %}
+
+{% block extra_css %}
+<style>
+.filter-bar {
+  display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;
+}
+.filter-btn {
+  padding:8px 16px; border:1.5px solid var(--border); background:#fff;
+  border-radius:8px; text-decoration:none; color:var(--text);
+  font-family:'Inter',sans-serif; font-size:.85rem; cursor:pointer;
+  transition:all .2s;
+}
+.filter-btn:hover { background:var(--bg-soft); }
+.filter-btn.active {
+  background:var(--navy); color:#fff; border-color:var(--navy);
+}
+
+.delivery-card {
+  background:var(--white); border:1.5px solid var(--border); border-radius:12px;
+  padding:20px; margin-bottom:12px; transition:box-shadow .2s; cursor:pointer;
+}
+.delivery-card:hover { box-shadow:0 4px 12px rgba(0,0,0,.08); }
+
+.delivery-header {
+  display:flex; justify-content:space-between; align-items:flex-start;
+  margin-bottom:12px; padding-bottom:12px; border-bottom:1px dashed var(--border);
+}
+.delivery-id {
+  font-family:'Nunito',sans-serif; font-size:1.1rem; font-weight:900; color:var(--navy);
+}
+.delivery-status {
+  padding:4px 12px; border-radius:20px; font-family:'Nunito',sans-serif;
+  font-size:.75rem; font-weight:800; text-transform:uppercase;
+}
+
+.delivery-grid {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;
+  margin-top:12px;
+}
+
+.info-col {
+  font-family:'Inter',sans-serif; font-size:.9rem;
+}
+.info-col div { margin-bottom:8px; }
+.info-label {
+  font-family:'Nunito',sans-serif; font-size:.7rem; font-weight:800;
+  color:var(--muted); text-transform:uppercase; letter-spacing:.05em;
+  margin-bottom:2px;
+}
+.info-value {
+  color:var(--text); font-weight:500;
+}
+
+.delivery-actions {
+  display:flex; gap:8px; margin-top:16px; padding-top:12px; border-top:1px solid var(--border);
+}
+
+.btn-small {
+  padding:6px 12px; border:none; border-radius:6px; font-family:'Nunito',sans-serif;
+  font-size:.8rem; font-weight:800; cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; gap:4px;
+}
+.btn-update { background:var(--orange); color:#fff; }
+.btn-view { background:var(--blue-bg); color:var(--blue); }
+
+.empty-state {
+  text-align:center; padding:60px 20px; background:var(--white);
+  border:1.5px solid var(--border); border-radius:14px;
+}
+.empty-icon { font-size:3.5rem; color:var(--border); margin-bottom:12px; }
+.empty-state h4 {
+  font-family:'Nunito',sans-serif; font-size:1.2rem; font-weight:900; color:var(--navy);
+  margin-bottom:6px;
+}
+.empty-state p { font-family:'Inter',sans-serif; color:var(--muted); margin:0; }
+
+@media(max-width:768px) {
+  .delivery-header { flex-direction:column; gap:8px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="filter-bar">
+  <a href="{% url 'staff_deliveries' %}" class="filter-btn {% if not status_filter %}active{% endif %}">All</a>
+  {% for value, label in status_choices %}
+  <a href="{% url 'staff_deliveries' %}?status={{ value }}" class="filter-btn {% if status_filter == value %}active{% endif %}">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+{% if deliveries %}
+  {% for delivery in deliveries %}
+  <div class="delivery-card">
+    <div class="delivery-header">
+      <div class="delivery-id">
+        Order #{{ delivery.order.order_id }}
+        <span style="font-size:.75rem; font-weight:500; color:var(--muted); margin-left:8px;">
+          {{ delivery.order.order_date|date:"M j, Y" }}
+        </span>
+      </div>
+      <div class="booking-status status-{{ delivery.delivery_status }}">
+        {{ delivery.get_delivery_status_display }}
+      </div>
+    </div>
+
+    <div class="delivery-grid">
+      <div class="info-col">
+        <div>
+          <div class="info-label">Customer</div>
+          <div class="info-value">{{ delivery.order.customer.cust_name }}</div>
+        </div>
+        <div>
+          <div class="info-label">Address</div>
+          <div class="info-value" style="max-width:250px;">{{ delivery.order.customer.address|truncatechars:80 }}</div>
+        </div>
+        {% if delivery.staff %}
+        <div>
+          <div class="info-label">Assigned Staff</div>
+          <div class="info-value">{{ delivery.staff.full_name }}</div>
+        </div>
+        {% endif %}
+      </div>
+      <div class="info-col">
+        <div>
+          <div class="info-label">Delivery Date</div>
+          <div class="info-value">
+            {% if delivery.delivery_date %}
+              {{ delivery.delivery_date|date:"l, F j, Y" }}
+            {% else %}
+              <span style="color:var(--muted);">— Not set —</span>
+            {% endif %}
+          </div>
+        </div>
+        <div>
+          <div class="info-label">Phone</div>
+          <div class="info-value">{{ delivery.order.customer.phone }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="delivery-actions">
+      <a href="{% url 'staff_delivery_update' delivery.pk %}" class="btn-small btn-update">
+        <i class="bi bi-pencil"></i> Update Status
+      </a>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+    <h4>No Deliveries Found</h4>
+    <p>{% if status_filter %}No deliveries with this status.{% else %}You don't have any deliveries assigned yet.{% endif %}</p>
+  </div>
+{% endif %}
+{% endblock %}

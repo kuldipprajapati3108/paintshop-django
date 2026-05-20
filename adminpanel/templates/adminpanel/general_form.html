@@ -1,0 +1,126 @@
+{% extends "adminpanel/base_admin.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h2>{{ title }}</h2>
+    <div class="breadcrumb-sub">
+      <a href="{% url 'admin_dashboard' %}" style="color: var(--text-muted); text-decoration:none;">Dashboard</a>
+      <span style="margin: 0 6px; color: var(--text-muted);">›</span>
+      <a href="{{ list_url }}" style="color: var(--text-muted); text-decoration:none;">List</a>
+      <span style="margin: 0 6px; color: var(--text-muted);">›</span>
+      {{ title }}
+    </div>
+  </div>
+</div>
+
+<div class="form-panel">
+  <div class="form-panel-header">
+    <h3>{{ title }}</h3>
+  </div>
+
+  <form method="post" action="{{ request.path }}" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="form-panel-body">
+      {% for field in form %}
+        <div class="form-row">
+          <label for="{{ field.id_for_label }}">
+            {{ field.label }}
+            {% if field.field.required %}
+              <span class="req">*</span>
+            {% endif %}
+          </label>
+          <div class="field-wrap">
+            {{ field }}
+            {% if field.errors %}
+              <div class="field-error">{{ field.errors|striptags }}</div>
+            {% endif %}
+            {% if field.help_text %}
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 3px;">{{ field.help_text }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    {% for inline_cfg, formset in inline_formsets %}
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <strong>{{ inline_cfg.title }}</strong>
+            <small class="text-muted">Check "Delete" to remove an existing image</small>
+        </div>
+        <div class="card-body p-0">
+
+            {{ formset.management_form }}
+
+            {% if formset.non_form_errors %}
+                <div class="alert alert-danger m-3">{{ formset.non_form_errors }}</div>
+            {% endif %}
+
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        {% for field in formset.empty_form %}
+                            {% if field.name != "id" and field.name != "product" and field.name != "image_id" and field.name != "DELETE" %}
+                            <th class="ps-3" style="font-size:.82rem; font-weight:700; color:#555;">
+                                {{ field.label }}
+                            </th>
+                            {% endif %}
+                        {% endfor %}
+                        <th style="font-size:.82rem; font-weight:700; color:#555;">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for form_row in formset %}
+                        <tr class="{% if form_row.instance.pk %}existing-inline{% else %}new-inline{% endif %}">
+                            {{ form_row.id }}
+
+                            {% for field in form_row %}
+                                {% if field.name != "id" and field.name != "DELETE" and field.name != "product" and field.name != "image_id" %}
+                                <td class="ps-3">
+                                    <!-- show existing image thumbnail -->
+                                    {% if field.name == "image_url" and form_row.instance.pk %}
+                                        {% if form_row.instance.image_url %}
+                                        <div class="mb-1">
+                                            <img src="/media/{{ form_row.instance.image_url }}"
+                                                 style="height:56px; width:56px; object-fit:cover;
+                                                        border-radius:6px; border:1px solid #ddd;">
+                                        </div>
+                                        {% endif %}
+                                    {% endif %}
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <div class="text-danger small">{{ field.errors|striptags }}</div>
+                                    {% endif %}
+                                </td>
+                                {% endif %}
+                            {% endfor %}
+
+                            <!-- Delete checkbox -->
+                            <td class="text-center">
+                                {% if form_row.instance.pk %}
+                                    {{ form_row.DELETE }}
+                                {% else %}
+                                    <span class="text-muted small">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endfor %}
+    <div class="form-actions">
+      <button type="submit" class="btn-save">
+        <i class="bi bi-check-lg" style="margin-right: 4px;"></i> Save
+      </button>
+      <a href="{{ list_url }}" class="btn-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

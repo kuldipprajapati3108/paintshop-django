@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Cart — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-hero { padding: 28px 0 24px; }
+.page-hero h1 { font-family:'Nunito',sans-serif; font-size:1.8rem; font-weight:900; margin:0; }
+
+.cart-layout { display:flex; gap:28px; align-items:flex-start; padding:36px 0; }
+.cart-main   { flex:1; min-width:0; }
+.cart-summary{ width:300px; flex-shrink:0; position:sticky; top:70px; }
+
+/* cart item card */
+.cart-item {
+  background:var(--white); border:1.5px solid var(--border); border-radius:14px;
+  padding:18px 20px; display:flex; align-items:center; gap:16px;
+  margin-bottom:14px; transition:border-color .2s;
+}
+.cart-item:hover { border-color:var(--orange); }
+.cart-item-img {
+  width:80px; height:80px; flex-shrink:0; border-radius:10px;
+  background:var(--bg-soft); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.cart-item-img img { width:100%; height:100%; object-fit:contain; padding:4px; }
+.cart-item-info { flex:1; min-width:0; }
+.cart-item-name {
+  font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:800;
+  color:var(--navy); margin-bottom:4px;
+}
+.cart-item-color {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'Inter',sans-serif; font-size:.78rem; color:var(--muted);
+}
+.color-dot { width:14px; height:14px; border-radius:50%; border:1.5px solid var(--border-dk); }
+.cart-item-price {
+  font-family:'Nunito',sans-serif; font-size:1rem; font-weight:900; color:var(--orange);
+}
+.cart-item-subtotal {
+  font-family:'Inter',sans-serif; font-size:.78rem; color:var(--muted); margin-top:2px;
+}
+
+/* qty control */
+.qty-control { display:flex; align-items:center; gap:0; border:1.5px solid var(--border); border-radius:8px; overflow:hidden; }
+.qty-btn {
+  width:32px; height:32px; background:var(--bg-soft); border:none;
+  font-size:1rem; font-weight:700; color:var(--navy); cursor:pointer;
+  transition:background .15s; display:flex; align-items:center; justify-content:center;
+}
+.qty-btn:hover { background:var(--orange); color:#fff; }
+.qty-val {
+  width:38px; text-align:center; font-family:'Nunito',sans-serif;
+  font-size:.9rem; font-weight:800; color:var(--navy);
+}
+.btn-remove {
+  background:none; border:none; color:#dc3545; cursor:pointer;
+  font-size:.9rem; padding:4px 8px; border-radius:6px; transition:background .15s;
+}
+.btn-remove:hover { background:#fff0f0; }
+
+/* summary card */
+.summary-card {
+  background:var(--white); border:1.5px solid var(--border); border-radius:14px;
+  overflow:hidden;
+}
+.summary-header {
+  background:var(--navy); padding:16px 20px;
+  font-family:'Nunito',sans-serif; font-size:1rem; font-weight:900; color:#fff;
+}
+.summary-body { padding:20px; }
+.summary-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.summary-label { font-family:'Inter',sans-serif; font-size:.88rem; color:var(--muted); }
+.summary-val   { font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:700; color:var(--navy); }
+.summary-divider { height:1px; background:var(--border); margin:14px 0; }
+.summary-total-label { font-family:'Nunito',sans-serif; font-size:1rem; font-weight:900; color:var(--navy); }
+.summary-total-val   { font-family:'Nunito',sans-serif; font-size:1.3rem; font-weight:900; color:var(--orange); }
+.btn-checkout {
+  display:block; width:100%; padding:13px;
+  background:var(--orange); border:none; border-radius:10px;
+  color:#fff; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:900;
+  text-align:center; text-decoration:none; margin-top:16px;
+  cursor:pointer; transition:background .2s;
+  box-shadow:0 4px 16px rgba(244,81,30,.3);
+}
+.btn-checkout:hover { background:var(--orange-dk); color:#fff; }
+.btn-continue {
+  display:block; text-align:center; margin-top:10px;
+  font-family:'Nunito',sans-serif; font-size:.85rem; font-weight:700;
+  color:var(--muted); text-decoration:none;
+}
+.btn-continue:hover { color:var(--orange); }
+
+.empty-cart { text-align:center; padding:60px 20px; color:var(--muted); }
+.empty-cart i { font-size:3.5rem; color:var(--border-dk); display:block; margin-bottom:16px; }
+.empty-cart p { font-family:'Inter',sans-serif; font-size:.95rem; }
+.btn-shop {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:11px 28px; background:var(--orange); color:#fff;
+  border-radius:10px; font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:800;
+  text-decoration:none; margin-top:16px; transition:background .2s;
+}
+.btn-shop:hover { background:var(--orange-dk); color:#fff; }
+
+@media(max-width:900px) {
+  .cart-layout { flex-direction:column; }
+  .cart-summary { width:100%; position:static; }
+}
+@media(max-width:575px) {
+  .cart-item { flex-wrap:wrap; gap:12px; }
+  .cart-item-img { width:60px; height:60px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container-fluid px-4 px-md-5">
+    <h1><i class="bi bi-bag me-2" style="color:var(--orange);"></i>My Cart
+      {% if items %}<span style="font-size:1rem;font-weight:700;opacity:.6;margin-left:8px;">{{ items|length }} item{{ items|length|pluralize }}</span>{% endif %}
+    </h1>
+  </div>
+</div>
+
+<div class="container-fluid px-4 px-md-5">
+  <div class="cart-layout">
+
+    <!-- ══ CART ITEMS ══ -->
+    <div class="cart-main">
+      {% if items %}
+        {% for item in items %}
+        <div class="cart-item">
+
+          <div class="cart-item-img">
+            {% if item.product.primary_image %}
+              <img src="/media/{{ item.product.primary_image }}" alt="{{ item.product.product_name }}">
+            {% else %}
+              <i class="bi bi-image text-secondary fs-3"></i>
+            {% endif %}
+          </div>
+
+          <div class="cart-item-info">
+            <div class="cart-item-name">{{ item.product.product_name }}</div>
+            {% if item.variant %}
+            <div class="cart-item-color">
+              <i class="bi bi-layers" style="color:var(--orange);"></i>
+              {{ item.variant.label }}
+            </div>
+            {% endif %}
+            {% if item.color %}
+            <div class="cart-item-color">
+              <span class="color-dot" style="background:{{ item.color.color_code }};"></span>
+              {{ item.color.color_name }}
+            </div>
+            {% endif %}
+            <div class="cart-item-price mt-1">
+              ₹{% if item.variant %}{{ item.variant.price }}{% else %}{{ item.product.price }}{% endif %}
+            </div>
+            <div class="cart-item-subtotal">Subtotal: ₹{{ item.subtotal }}</div>
+          </div>
+
+          <!-- qty controls -->
+          <div class="d-flex flex-column align-items-center gap-2">
+            <div class="qty-control">
+              <form method="post" action="{% url 'update_cart' item.cart_item_id %}">
+                {% csrf_token %}<input type="hidden" name="action" value="decrease">
+                <button type="submit" class="qty-btn">−</button>
+              </form>
+              <span class="qty-val">{{ item.quantity }}</span>
+              <form method="post" action="{% url 'update_cart' item.cart_item_id %}">
+                {% csrf_token %}<input type="hidden" name="action" value="increase">
+                <button type="submit" class="qty-btn">+</button>
+              </form>
+            </div>
+            <form method="post" action="{% url 'update_cart' item.cart_item_id %}">
+              {% csrf_token %}<input type="hidden" name="action" value="remove">
+              <button type="submit" class="btn-remove"><i class="bi bi-trash3"></i> Remove</button>
+            </form>
+          </div>
+
+        </div>
+        {% endfor %}
+
+      {% else %}
+        <div class="empty-cart">
+          <i class="bi bi-bag-x"></i>
+          <p>Your cart is empty.</p>
+          <a href="{% url 'product_list' %}" class="btn-shop"><i class="bi bi-grid"></i> Browse Products</a>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if items %}
+    <div class="cart-summary">
+      <div class="summary-card">
+        <div class="summary-header"><i class="bi bi-receipt me-2"></i>Order Summary</div>
+        <div class="summary-body">
+          {% for item in items %}
+          <div class="summary-row">
+            <span class="summary-label">
+              {{ item.product.product_name }}
+              {% if item.variant %} · {{ item.variant.label }}{% endif %}
+              {% if item.color %} ({{ item.color.color_name }}){% endif %}
+              × {{ item.quantity }}
+            </span>
+            <span class="summary-val">₹{{ item.subtotal }}</span>
+          </div>
+          {% endfor %}
+          <div class="summary-divider"></div>
+          <div class="summary-row">
+            <span class="summary-total-label">Total</span>
+            <span class="summary-total-val">₹{{ total }}</span>
+          </div>
+          <a href="{% url 'checkout' %}" class="btn-checkout">
+            <i class="bi bi-lock-fill me-1"></i> Proceed to Checkout
+          </a>
+          <a href="{% url 'product_list' %}" class="btn-continue">
+            <i class="bi bi-arrow-left me-1"></i> Continue Shopping
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

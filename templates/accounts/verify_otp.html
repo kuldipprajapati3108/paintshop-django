@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Verify OTP{% endblock %}
+
+{% block content %}
+
+<div class="d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 160px);">
+
+  <div class="card shadow-lg" style="width: 420px;">
+    <div class="card-body p-4">
+
+      <div class="text-center mb-3">
+        <h4 class="fw-bold mb-1">Verify OTP</h4>
+        <p class="text-muted mb-0">
+          <i class="bi bi-phone"></i> +91 {{ target }}
+        </p>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} text-center py-2">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" id="otpForm">
+        {% csrf_token %}
+
+        <div class="d-flex justify-content-center gap-2 mb-3">
+          {% for i in "123456" %}
+            <input type="text"
+                   maxlength="1"
+                   class="form-control text-center otp-input"
+                   style="width: 48px; font-size: 1.25rem;"
+                   inputmode="numeric"
+                   autocomplete="one-time-code">
+          {% endfor %}
+        </div>
+
+        <input type="hidden" name="final_otp" id="final_otp">
+
+        <button class="btn btn-dark w-100 mb-3"
+                id="verifyBtn"
+                type="submit"
+                disabled>
+          <i class="bi bi-shield-check"></i> Verify OTP
+        </button>
+      </form>
+      <div class="text-center">
+        <span id="timerText" class="text-muted">
+          Resend OTP in <span id="timer">{{ remaining_time }}</span>s
+        </span>
+
+        <form method="post" class="d-inline">
+          {% csrf_token %}
+          <button class="btn btn-link p-0 d-none"
+                  id="resendBtn"
+                  type="submit"
+                  name="resend_otp">
+            Resend OTP
+          </button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+const inputs = document.querySelectorAll(".otp-input");
+const hiddenInput = document.getElementById("final_otp");
+const verifyBtn = document.getElementById("verifyBtn");
+
+function updateOTP() {
+  const otp = Array.from(inputs).map(i => i.value).join("");
+  hiddenInput.value = otp;
+  verifyBtn.disabled = otp.length !== 6;
+}
+
+inputs.forEach((input, index) => {
+
+  input.addEventListener("input", () => {
+    if (input.value && index < inputs.length - 1) {
+      inputs[index + 1].focus();
+    }
+    updateOTP();
+  });
+
+  input.addEventListener("keydown", e => {
+    if (e.key === "Backspace" && !input.value && index > 0) {
+      inputs[index - 1].focus();
+    }
+  });
+
+});
+
+inputs[0].addEventListener("paste", e => {
+  const data = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+  inputs.forEach((input, i) => input.value = data[i] || "");
+  updateOTP();
+});
+
+let timeLeft = parseInt(document.getElementById("timer").innerText);
+const timerEl = document.getElementById("timer");
+const timerText = document.getElementById("timerText");
+const resendBtn = document.getElementById("resendBtn");
+
+if (timeLeft > 0) {
+  const interval = setInterval(() => {
+    timeLeft--;
+    timerEl.innerText = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(interval);
+      timerText.classList.add("d-none");
+      resendBtn.classList.remove("d-none");
+    }
+  }, 1000);
+}
+</script>
+
+{% endblock %}

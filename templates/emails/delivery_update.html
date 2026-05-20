@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Update</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 10px; }
+        .header { background: #059669; color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { background: #f9fafb; padding: 30px; }
+        .status-badge { display: inline-block; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin: 15px 0; }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-assigned { background: #dbeafe; color: #1e40af; }
+        .status-out_for_delivery { background: #e0e7ff; color: #3730a3; }
+        .status-delivered { background: #d1fae5; color: #065f46; }
+        .status-failed { background: #fee2e2; color: #991b1b; }
+        .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb; }
+        .staff-info { background: #ecfdf5; border-left: 4px solid #10b981; padding: 15px; margin: 10px 0; }
+        .delivery-date { background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 10px 0; }
+        .btn { display: inline-block; padding: 12px 30px; background: #059669; color: white; text-decoration: none; border-radius: 6px; margin: 10px 0; }
+        .item-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .item-table th { background: #f3f4f6; padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb; }
+        .item-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> {{ site_name }}</h1>
+            <p>Delivery Update</p>
+        </div>
+
+        <div class="content">
+            <p>Dear {{ customer.cust_name }},</p>
+            <p>Your order delivery status has been updated. Here's the latest information:</p>
+
+            <div class="info-box" style="text-align: center;">
+                <h3>Order #{{ order.order_id }}</h3>
+                <div class="status-badge status-{{ delivery.delivery_status|lower }}">
+                    {{ status }}
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>Delivery Details</h3>
+                <p><strong>Delivery Address:</strong> {{ order.customer.address|default:"No address on file" }}</p>
+                <p><strong>Order Date:</strong> {{ order.order_date|date:"F j, Y, g:i a" }}</p>
+
+                {% if delivery.delivery_date %}
+                <div class="delivery-date">
+                    <strong>🗓️ Estimated Delivery Date:</strong> {{ delivery.delivery_date|date:"F j, Y" }}
+                </div>
+                {% endif %}
+
+                {% if delivery.staff %}
+                <div class="staff-info">
+                    <strong>👤 Assigned Delivery Staff:</strong> {{ delivery.staff.full_name }}<br>
+                    {% if delivery.staff.phone %}
+                    <strong>📞 Contact:</strong> {{ delivery.staff.phone }}
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <h3>Order Items</h3>
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Color</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.product.product_name }}</td>
+                        <td>
+                            {% if item.color %}
+                                <span style="display:inline-flex;align-items:center;gap:5px;">
+                                    <span style="width:12px;height:12px;border-radius:50%;background:{{ item.color.color_code }};border:1px solid #ddd;display:inline-block;"></span>
+                                    {{ item.color.color_name }}
+                                </span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ item.price }}</td>
+                        <td>₹{{ item.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr style="background: #f3f4f6; font-weight: bold;">
+                        <td colspan="4" style="text-align: right;">Total</td>
+                        <td style="color: #059669;">₹{{ total }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>What this means:</h3>
+            {% if delivery.delivery_status == "pending" %}
+                <p>Your order is in the queue and will be assigned to a delivery partner soon.</p>
+            {% elif delivery.delivery_status == "assigned" %}
+                <p>A delivery partner has been assigned to your order. They will contact you shortly.</p>
+            {% elif delivery.delivery_status == "out_for_delivery" %}
+                <p>🎉 Your order is on its way! Please be available to receive the delivery.</p>
+                {% if delivery.staff %}
+                <p><strong>Delivery Partner:</strong> {{ delivery.staff.full_name }}</p>
+                {% endif %}
+            {% elif delivery.delivery_status == "delivered" %}
+                <p>✅ Your order has been successfully delivered!</p>
+                <p>We hope you enjoy your purchase. Don't forget to leave reviews for your products!</p>
+            {% elif delivery.delivery_status == "failed" %}
+                <p>❌ There was an issue with the delivery.</p>
+                <p>Our team will contact you to arrange a redelivery or alternative solution.</p>
+            {% endif %}
+
+            <p>
+                <a href="#" class="btn">Track Your Order</a>
+            </p>
+
+            <p>If you have any questions about your delivery, please contact us immediately.</p>
+            <p>Best regards,<br><strong>{{ site_name }} Team</strong></p>
+        </div>
+
+        <div class="footer">
+            <p>© {% now "Y" %} {{ site_name }}. All rights reserved.</p>
+            <p>Need help? Contact us at shreeshankartraders@gmail.com</p>
+            <p style="font-size: 12px; color: #9ca3af;">This is an automated email, please do not reply.</p>
+        </div>
+    </div>
+</body>
+</html>

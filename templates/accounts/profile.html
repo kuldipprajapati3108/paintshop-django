@@ -1,0 +1,291 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Profile — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+.profile-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 24px;
+  align-items: start;
+  padding: 36px 0 56px;
+}
+
+.profile-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.avatar-block {
+  background: var(--navy);
+  border-bottom: 3px solid var(--orange);
+  padding: 24px 16px;
+  text-align: center;
+}
+.avatar-circle {
+  width: 60px; height: 60px;
+  border-radius: 50%;
+  background: var(--orange);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem; font-weight: 900; color: #fff;
+  margin-bottom: 10px;
+}
+.avatar-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: .95rem; font-weight: 800; color: #fff;
+}
+.avatar-username {
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem; color: rgba(255,255,255,.45); margin-top: 2px;
+}
+
+.stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+.stat-cell {
+  padding: 12px 6px; text-align: center;
+  border-right: 1.5px solid var(--border);
+}
+.stat-cell:last-child { border-right: none; }
+.stat-n {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.2rem; font-weight: 900; color: var(--orange); display: block;
+}
+.stat-l {
+  font-family: 'Inter', sans-serif;
+  font-size: .68rem; color: var(--muted);
+  text-transform: uppercase; letter-spacing: .05em;
+}
+
+.nav-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  font-family: 'Nunito', sans-serif; font-size: .88rem; font-weight: 700;
+  color: var(--text); cursor: pointer;
+  border: none; background: none; width: 100%; text-align: left;
+  border-left: 3px solid transparent; transition: background .15s;
+}
+.nav-btn i { color: var(--muted); font-size: .95rem; }
+.nav-btn:hover { background: var(--bg-soft); }
+.nav-btn.active { background: var(--orange-bg); color: var(--orange); border-left-color: var(--orange); }
+.nav-btn.active i { color: var(--orange); }
+
+.link-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px;
+  font-family: 'Nunito', sans-serif; font-size: .88rem; font-weight: 700;
+  color: var(--text); text-decoration: none;
+  border-left: 3px solid transparent; transition: background .15s;
+}
+.link-btn:hover { background: var(--bg-soft); color: var(--text); }
+.link-btn .left { display: flex; align-items: center; gap: 10px; }
+.link-btn i { color: var(--muted); font-size: .95rem; }
+.link-btn .arr { color: var(--muted); font-size: 1rem; }
+
+.nav-divider { height: 1.5px; background: var(--border); }
+
+.profile-panel { display: none; }
+.profile-panel.active { display: block; }
+
+.profile-panel h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem; font-weight: 900; color: var(--navy);
+  margin-bottom: 18px;
+}
+
+.form-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+}
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.field-group { margin-bottom: 14px; }
+.field-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: .73rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .07em;
+  color: var(--navy); display: block; margin-bottom: 5px;
+}
+.field-input {
+  width: 100%; padding: 10px 13px;
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
+  font-family: 'Inter', sans-serif; font-size: .88rem; color: var(--text);
+  background: var(--bg-soft); outline: none; transition: border-color .2s;
+}
+.field-input:focus { border-color: var(--orange); background: var(--white); }
+.field-input[readonly] { color: var(--muted); cursor: default; }
+textarea.field-input { resize: none; height: 78px; }
+
+.field-note {
+  font-family: 'Inter', sans-serif;
+  font-size: .72rem; color: var(--muted); margin-top: 3px;
+}
+
+.btn-save {
+  width: 100%; padding: 11px;
+  background: var(--orange); color: #fff; border: none;
+  border-radius: var(--r-sm);
+  font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 800;
+  cursor: pointer; transition: background .2s; margin-top: 4px;
+}
+.btn-save:hover { background: var(--orange-dk); }
+
+@media (max-width: 900px) {
+  .profile-layout { grid-template-columns: 1fr; }
+  .field-row { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-md-5">
+  <div class="profile-layout">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside>
+      <div class="profile-card">
+        <div class="avatar-block">
+          <div class="avatar-circle">{{ customer.cust_name|first|upper }}</div>
+          <div class="avatar-name">{{ customer.cust_name }}</div>
+          <div class="avatar-username">@{{ request.user.username }}</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-cell">
+            <span class="stat-n">{{ total_orders }}</span>
+            <span class="stat-l">Orders</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-n">{{ completed_orders }}</span>
+            <span class="stat-l">Done</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-n">{{ pending_orders }}</span>
+            <span class="stat-l">Pending</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="profile-card">
+        <div style="padding: 6px 0;">
+          <button class="nav-btn active" onclick="switchTab('info', this)">
+            <i class="bi bi-person"></i> Personal Info
+          </button>
+          <button class="nav-btn" onclick="switchTab('password', this)">
+            <i class="bi bi-lock"></i> Change Password
+          </button>
+
+          <div class="nav-divider"></div>
+
+          <a href="{% url 'my_orders' %}" class="link-btn">
+            <span class="left"><i class="bi bi-bag"></i> My Orders</span>
+            <span class="arr"><i class="bi bi-chevron-right"></i></span>
+          </a>
+          <a href="{% url 'my_bookings' %}" class="link-btn">
+            <span class="left"><i class="bi bi-calendar-check"></i> My Bookings</span>
+            <span class="arr"><i class="bi bi-chevron-right"></i></span>
+          </a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <div>
+
+      <!-- Personal Info -->
+      <div id="panel-info" class="profile-panel active">
+        <h2>Personal Information</h2>
+        <div class="form-card">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="update_profile">
+
+            <div class="field-row">
+              <div>
+                <label class="field-label">Full Name</label>
+                <input type="text" name="cust_name" class="field-input" value="{{ customer.cust_name }}" required>
+              </div>
+              <div>
+                <label class="field-label">Username</label>
+                <input type="text" class="field-input" value="{{ request.user.username }}" readonly>
+              </div>
+            </div>
+
+            <div class="field-row">
+              <div>
+                <label class="field-label">Phone Number</label>
+                <input type="tel" name="phone" class="field-input" value="{{ customer.phone }}" maxlength="10" required>
+              </div>
+              <div>
+                <label class="field-label">Email Address</label>
+                <input type="email" class="field-input" value="{{ customer.email }}" readonly>
+                <div class="field-note">Email cannot be changed.</div>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label class="field-label">Delivery Address</label>
+              <textarea name="address" class="field-input" placeholder="Enter your default delivery address…">{{ customer.address }}</textarea>
+            </div>
+
+            <button type="submit" class="btn-save">Save Changes</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Change Password -->
+      <div id="panel-password" class="profile-panel">
+        <h2>Change Password</h2>
+        <div class="form-card" style="max-width: 440px;">
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="change_password">
+
+            <div class="field-group">
+              <label class="field-label">Current Password</label>
+              <input type="password" name="current_password" class="field-input" placeholder="Enter current password" required>
+            </div>
+            <div class="field-group">
+              <label class="field-label">New Password</label>
+              <input type="password" name="new_password" class="field-input" placeholder="Min. 8 characters" required>
+            </div>
+            <div class="field-group">
+              <label class="field-label">Confirm New Password</label>
+              <input type="password" name="confirm_password" class="field-input" placeholder="Repeat new password" required>
+            </div>
+
+            <button type="submit" class="btn-save">Update Password</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.profile-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+{% if messages %}
+{% for message in messages %}
+{% if 'password' in message.message|lower or 'Password' in message.message %}
+document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.profile-panel').forEach(p => p.classList.remove('active'));
+document.getElementById('panel-password').classList.add('active');
+document.querySelectorAll('.nav-btn')[1].classList.add('active');
+{% endif %}
+{% endfor %}
+{% endif %}
+</script>
+{% endblock %}

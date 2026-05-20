@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Feedback for Order #{{ order.order_id }} — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-hero { padding: 28px 0 24px; }
+.page-hero h1 { font-family:'Nunito',sans-serif; font-size:1.8rem; font-weight:900; margin:0; }
+
+.feedback-wrap { padding: 36px 0 56px; }
+
+.order-header-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-id {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--navy);
+}
+
+.order-date {
+  font-family: 'Inter', sans-serif;
+  font-size: .82rem;
+  color: var(--muted);
+}
+
+.feedback-list {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.feedback-item {
+  display: flex;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  align-items: center;
+}
+
+.feedback-item:last-child { border-bottom: none; }
+
+.item-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.item-img img { max-width: 100%; max-height: 100%; object-fit: contain; padding: 3px; }
+
+.item-details { flex: 1; min-width: 0; }
+
+.item-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+
+.item-meta {
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+.btn-feedback {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--orange);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: .82rem;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .2s;
+}
+
+.btn-feedback:hover { background: var(--orange-dk); color: #fff; }
+
+.btn-feedback.done {
+  background: #d1fae5;
+  color: #065f46;
+  cursor: default;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state i {
+  font-size: 3.5rem;
+  color: var(--border);
+  margin-bottom: 14px;
+}
+
+.empty-state h3 {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+
+.empty-state p {
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  color: var(--muted);
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: .88rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.btn-back:hover { color: var(--orange); }
+
+@media (max-width: 575px) {
+  .feedback-item { flex-wrap: wrap; }
+  .btn-feedback { width: 100%; justify-content: center; margin-top: 8px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="feedback-wrap">
+  <div class="container-fluid px-4 px-md-5">
+
+    <a href="{% url 'order_confirmation' order.order_id %}" class="btn-back text-decoration-none">
+      <i class="bi bi-arrow-left"></i> Back to Order
+    </a>
+
+    <div class="page-hero">
+      <div class="container-fluid px-4 px-md-5">
+        <h1><i class="bi bi-star" style="color:var(--orange);"></i> Share Your Feedback</h1>
+      </div>
+    </div>
+
+    <div class="order-header-card">
+      <div>
+        <div class="order-id">Order #{{ order.order_id }}</div>
+        <div class="order-date">Placed on {{ order.order_date|date:"d M Y, h:i A" }}</div>
+      </div>
+      <div style="font-family:'Inter',sans-serif;font-size:.9rem;color:var(--muted);">
+        {% if can_review_count == unreviewed_items|length %}
+          All items need your feedback!
+        {% else %}
+          {{ unreviewed_items|length }} item{{ unreviewed_items|length|pluralize }} need your review
+        {% endif %}
+      </div>
+    </div>
+
+    {% if unreviewed_items %}
+    <div class="feedback-list">
+      {% for item in unreviewed_items %}
+      <div class="feedback-item">
+        <div class="item-img">
+          {% if item.product.primary_image %}
+            <img src="/media/{{ item.product.primary_image }}" alt="{{ item.product.product_name }}">
+          {% else %}
+            <i class="bi bi-image text-secondary"></i>
+          {% endif %}
+        </div>
+        <div class="item-details">
+          <div class="item-name">{{ item.product.product_name }}</div>
+          <div class="item-meta">
+            Qty: {{ item.quantity }}
+            {% if item.color %}
+              &nbsp;·&nbsp;
+              <span style="display:inline-block;width:10px;height:10px;border-radius:50%;
+                background:{{ item.color.color_code }};border:1px solid #ccc;"></span>
+              {{ item.color.color_name }}
+            {% endif %}
+          </div>
+        </div>
+        <a href="{% url 'add_feedback' item.product.product_id %}" class="btn-feedback">
+          <i class="bi bi-star"></i> Review
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-chat-check"></i>
+      <h3>All Caught Up!</h3>
+      <p>You've already reviewed all products in this order. Thank you for sharing your feedback!</p>
+      <a href="{% url 'my_orders' %}" class="btn-feedback" style="display:inline-flex;margin-top:12px;">
+        <i class="bi bi-arrow-left"></i> Back to My Orders
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

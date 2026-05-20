@@ -1,0 +1,365 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Colour Catalogue — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Layout ──────────────────────────────────────────────── */
+.catalogue-layout {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
+  align-items: start;
+  padding: 36px 0 56px;
+}
+
+/* ── Page title ──────────────────────────────────────────── */
+.page-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.4rem; font-weight: 900; color: var(--navy);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+}
+.page-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: .82rem; color: var(--muted); margin-bottom: 20px;
+}
+
+/* ── Family filter pills ─────────────────────────────────── */
+.family-filters {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+}
+.fam-btn {
+  padding: 5px 14px; border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: .78rem; font-weight: 700;
+  border: 1.5px solid var(--border); background: var(--white);
+  color: var(--muted); cursor: pointer; transition: all .15s;
+}
+.fam-btn:hover { border-color: var(--orange); color: var(--orange); }
+.fam-btn.active { background: var(--orange-bg); color: var(--orange); border-color: var(--orange); }
+
+/* ── Search ──────────────────────────────────────────────── */
+.shade-search {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid var(--border); border-radius: 20px;
+  font-family: 'Inter', sans-serif; font-size: .88rem;
+  background: var(--white); color: var(--text); outline: none;
+  margin-bottom: 20px; transition: border-color .2s;
+}
+.shade-search:focus { border-color: var(--orange); }
+
+/* ── Family section ──────────────────────────────────────── */
+.family-section { margin-bottom: 28px; }
+.family-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: .78rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--muted); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.family-label::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── Shade grid ──────────────────────────────────────────── */
+.shade-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+}
+.shade-card {
+  cursor: pointer;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  border: 2px solid transparent;
+  transition: transform .15s, border-color .15s;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+}
+.shade-card:hover { transform: translateY(-3px); border-color: var(--orange); }
+.shade-card.selected {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--orange-bg);
+}
+.shade-swatch { height: 56px; width: 100%; display: block; }
+.shade-info { padding: 6px 7px 7px; background: var(--white); }
+.shade-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: .68rem; font-weight: 800; color: var(--navy);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.shade-code {
+  font-family: 'Inter', sans-serif;
+  font-size: .62rem; color: var(--muted); margin-top: 1px;
+}
+
+/* ── Visualiser sidebar ──────────────────────────────────── */
+.visualiser { position: sticky; top: 70px; }
+
+.vis-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.vis-card-head {
+  background: var(--navy);
+  border-bottom: 3px solid var(--orange);
+  padding: 13px 18px;
+  font-family: 'Nunito', sans-serif;
+  font-size: .88rem; font-weight: 900; color: #fff;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ── Room preview ────────────────────────────────────────── */
+.room-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+}
+.room-colour {
+  position: absolute; inset: 0;
+  background: #ffffff;
+  mix-blend-mode: multiply;
+  transition: background .4s ease;
+  z-index: 1;
+}
+.room-img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  z-index: 2;
+}
+
+/* ── Selected colour info ────────────────────────────────── */
+.selected-info { padding: 16px 18px; }
+.selected-swatch-row {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+}
+.selected-swatch-big {
+  width: 48px; height: 48px; border-radius: var(--r-sm);
+  border: 1.5px solid var(--border); flex-shrink: 0;
+  transition: background .3s;
+}
+.selected-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: .95rem; font-weight: 900; color: var(--navy);
+}
+.selected-code {
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem; color: var(--muted); margin-top: 2px;
+}
+.selected-hex {
+  font-family: 'Inter', sans-serif;
+  font-size: .75rem; color: var(--muted);
+}
+
+.no-selection {
+  text-align: center; padding: 20px;
+  font-family: 'Inter', sans-serif; font-size: .82rem; color: var(--muted);
+}
+
+/* ── Book button ─────────────────────────────────────────── */
+.btn-book-colour {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 12px;
+  background: var(--orange); color: #fff; border: none;
+  border-radius: var(--r-sm);
+  font-family: 'Nunito', sans-serif; font-size: .92rem; font-weight: 800;
+  cursor: pointer; text-decoration: none;
+  transition: background .2s; margin-top: 4px;
+}
+.btn-book-colour:hover { background: var(--orange-dk); color: #fff; }
+.btn-book-colour.disabled {
+  background: var(--border); color: var(--muted);
+  pointer-events: none; cursor: default;
+}
+
+/* ── Empty state ─────────────────────────────────────────── */
+.no-colours {
+  text-align: center; padding: 48px 20px;
+  font-family: 'Inter', sans-serif; font-size: .88rem; color: var(--muted);
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 960px) {
+  .catalogue-layout { grid-template-columns: 1fr; }
+  .visualiser { position: static; }
+}
+@media (max-width: 500px) {
+  .shade-grid { grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-md-5">
+  <div class="catalogue-layout">
+
+    <!-- ══ LEFT — Shade catalogue ══ -->
+    <div>
+      <div class="page-title">
+        <i class="bi bi-palette" style="color:var(--orange);"></i> Colour Catalogue
+      </div>
+      <div class="page-sub">Browse our full range of shades — click any colour to preview it on your room</div>
+
+      <!-- Family filter pills -->
+      <div class="family-filters">
+        <button class="fam-btn active" onclick="filterFamily('all', this)">All</button>
+        {% for fam in all_families %}
+        <button class="fam-btn" onclick="filterFamily('{{ fam }}', this)">{{ fam }}</button>
+        {% endfor %}
+      </div>
+
+      <!-- Shade families -->
+      {% if families %}
+        {% for family, colours in families.items %}
+        <div class="family-section" data-family="{{ family }}">
+          <div class="family-label">{{ family }}</div>
+          <div class="shade-grid">
+            {% for colour in colours %}
+            <div class="shade-card"
+                 data-id="{{ colour.color_id }}"
+                 data-name="{{ colour.color_name }}"
+                 data-hex="{{ colour.color_code }}"
+                 data-code="{{ colour.shade_code|default:colour.color_id }}"
+                 data-family="{{ colour.family|default:'Other' }}"
+                 onclick="pickColour(this)">
+              <div class="shade-swatch" style="background:{{ colour.color_code }};"></div>
+              <div class="shade-info">
+                <div class="shade-name">{{ colour.color_name }}</div>
+                <div class="shade-code">{{ colour.shade_code|default:"—" }}</div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% endfor %}
+
+        <div class="no-colours" id="noResults" style="display:none;">
+          No shades found for your search.
+        </div>
+
+      {% else %}
+        <div class="no-colours">
+          <i class="bi bi-palette" style="font-size:2.5rem;color:var(--border);display:block;margin-bottom:12px;"></i>
+          No colours in the catalogue yet.<br>
+          <a href="/admin_panel/colors/add/" style="color:var(--orange);font-weight:700;">Add colours from the admin panel →</a>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ══ RIGHT — Visualiser ══ -->
+    <aside class="visualiser">
+
+      <!-- Room preview -->
+      <div class="vis-card">
+        <div class="vis-card-head">
+          <i class="bi bi-eye"></i> Room Preview
+        </div>
+        <div class="room-wrap">
+          <div class="room-colour" id="roomColour"></div>
+          <img class="room-img" src="{% static 'images/bedroom.png' %}" alt="Room preview">
+        </div>
+      </div>
+
+      <!-- Selected colour info -->
+      <div class="vis-card">
+        <div class="vis-card-head">
+          <i class="bi bi-droplet-half"></i> Selected Colour
+        </div>
+        <div class="selected-info">
+
+          <div id="noSelectionMsg" class="no-selection">
+            <i class="bi bi-hand-index" style="font-size:1.5rem;display:block;margin-bottom:8px;"></i>
+            Click any shade to preview it here
+          </div>
+
+          <div id="selectionDetail" style="display:none;">
+            <div class="selected-swatch-row">
+              <div class="selected-swatch-big" id="selSwatch"></div>
+              <div>
+                <div class="selected-name" id="selName">—</div>
+                <div class="selected-code" id="selCode">—</div>
+                <div class="selected-hex" id="selHex">—</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let selectedId   = null;
+let currentFamily = 'all';
+let searchQuery   = '';
+
+function pickColour(el) {
+  // Deselect previous
+  document.querySelectorAll('.shade-card.selected').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const hex  = el.dataset.hex;
+  const name = el.dataset.name;
+  const code = el.dataset.code;
+  const id   = el.dataset.id;
+
+  selectedId = id;
+
+  // Update overlay
+  document.getElementById('roomColour').style.background = hex;
+
+  // Update info panel
+  document.getElementById('noSelectionMsg').style.display  = 'none';
+  document.getElementById('selectionDetail').style.display = 'block';
+  document.getElementById('selSwatch').style.background    = hex;
+  document.getElementById('selName').textContent           = name;
+  document.getElementById('selCode').textContent           = code;
+  document.getElementById('selHex').textContent            = hex.toUpperCase();
+
+  // Enable book button
+  const btn = document.getElementById('bookBtn');
+  btn.classList.remove('disabled');
+  btn.href = "{% url 'home' %}?color_id=" + id;
+}
+
+function filterFamily(fam, btn) {
+  currentFamily = fam;
+  document.querySelectorAll('.fam-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyFilters();
+}
+
+function applyFilters() {
+  let anyVisible = false;
+
+  // Show/hide family sections
+  document.querySelectorAll('.family-section').forEach(section => {
+    const fam = section.dataset.family;
+    const famMatch = currentFamily === 'all' || fam === currentFamily;
+
+    // Show/hide individual cards based on search
+    let sectionHasVisible = false;
+    section.querySelectorAll('.shade-card').forEach(card => {
+      const nameMatch = card.dataset.name.toLowerCase().includes(searchQuery);
+      const codeMatch = card.dataset.code.toLowerCase().includes(searchQuery);
+      const visible   = famMatch && (nameMatch || codeMatch);
+      card.style.display = visible ? 'block' : 'none';
+      if (visible) { sectionHasVisible = true; anyVisible = true; }
+    });
+
+    section.style.display = sectionHasVisible ? 'block' : 'none';
+  });
+
+  document.getElementById('noResults').style.display = anyVisible ? 'none' : 'block';
+}
+</script>
+{% endblock %}

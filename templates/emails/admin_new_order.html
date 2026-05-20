@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Order Alert</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 10px; }
+        .header { background: #dc2626; color: white; padding: 30px; text-align: center; }
+        .header h1 { margin: 0; font-size: 28px; }
+        .content { background: #f9fafb; padding: 30px; }
+        .alert-box { background: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; padding: 20px; margin: 15px 0; }
+        .info-box { background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid #e5e7eb; }
+        .item-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .item-table th { background: #f3f4f6; padding: 12px; text-align: left; border-bottom: 2px solid #e5e7eb; }
+        .item-table td { padding: 12px; border-bottom: 1px solid #e5e7eb; }
+        .total-row { background: #f3f4f6; font-weight: bold; }
+        .total-row td { color: #dc2626; font-size: 18px; }
+        .footer { background: #1f2937; color: white; padding: 20px; text-align: center; font-size: 14px; }
+        .btn { display: inline-block; padding: 12px 30px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1> New Order Alert</h1>
+            <p>{{ site_name }}</p>
+        </div>
+
+        <div class="content">
+            <div class="alert-box">
+                <h2 style="margin-top: 0; color: #dc2626;"> A new order has been placed!</h2>
+                <p>Action required: Please review and process this order promptly.</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Order Information</h3>
+                <p><strong>Order ID:</strong> #{{ order.order_id }}</p>
+                <p><strong>Order Date:</strong> {{ order.order_date|date:"F j, Y, g:i a" }}</p>
+                <p><strong>Order Status:</strong> {{ order.get_status_display }}</p>
+            </div>
+
+            <div class="info-box">
+                <h3>Customer Details</h3>
+                <p><strong>Name:</strong> {{ customer.cust_name }}</p>
+                <p><strong>Email:</strong> {{ customer.email }}</p>
+                <p><strong>Phone:</strong> {{ customer.phone }}</p>
+                {% if customer.address %}
+                <p><strong>Address:</strong> {{ customer.address }}</p>
+                {% endif %}
+            </div>
+
+            <h3>Order Items</h3>
+            <table class="item-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Color</th>
+                        <th>Qty</th>
+                        <th>Unit Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td>{{ item.product.product_name }}</td>
+                        <td>
+                            {% if item.color %}
+                                <span style="display:inline-flex;align-items:center;gap:5px;">
+                                    <span style="width:12px;height:12px;border-radius:50%;background:{{ item.color.color_code }};border:1px solid #ddd;display:inline-block;"></span>
+                                    {{ item.color.color_name }}
+                                </span>
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td>{{ item.quantity }}</td>
+                        <td>₹{{ item.price }}</td>
+                        <td>₹{{ item.subtotal }}</td>
+                    </tr>
+                    {% endfor %}
+                    <tr class="total-row">
+                        <td colspan="4" style="text-align: right;">Total Amount</td>
+                        <td>₹{{ total }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            {% if order.discount_amount > 0 %}
+            <div class="info-box">
+                <p><strong>Discount Applied:</strong> ₹{{ order.discount_amount }}</p>
+                <p><strong>Final Total:</strong> ₹{{ order.total_amount }}</p>
+            </div>
+            {% endif %}
+
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="#" class="btn">View Order in Admin Panel</a>
+            </p>
+
+            <p>Please take necessary action to fulfill this order. Thank you!</p>
+            <p>Best regards,<br><strong>{{ site_name }} Team</strong></p>
+        </div>
+
+        <div class="footer">
+            <p>© {% now "Y" %} {{ site_name }}. All rights reserved.</p>
+            <p>This is an automated alert from the order management system.</p>
+        </div>
+    </div>
+</body>
+</html>

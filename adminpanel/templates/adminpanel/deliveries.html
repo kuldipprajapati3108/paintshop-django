@@ -1,0 +1,127 @@
+{% extends "adminpanel/base_admin.html" %}
+{% block title %}Deliveries{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Deliveries</h2>
+    <div class="breadcrumb-sub">
+      <a href="{% url 'admin_dashboard' %}" style="color:var(--text-muted);text-decoration:none;">Dashboard</a>
+      <span style="margin:0 6px;color:var(--text-muted);">›</span> Deliveries
+    </div>
+  </div>
+</div>
+
+<!-- ── Status filter tabs ── -->
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;">
+  <a href="{% url 'admin_deliveries' %}"
+     style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;
+            background:{% if not status_filter %}var(--primary){% else %}var(--bg-card){% endif %};
+            color:{% if not status_filter %}#fff{% else %}var(--text-muted){% endif %};
+            border:1.5px solid {% if not status_filter %}var(--primary){% else %}var(--border){% endif %};">
+    All
+  </a>
+  {% for val, label in status_choices %}
+  <a href="?status={{ val }}"
+     style="padding:7px 16px;border-radius:8px;font-size:.82rem;font-weight:700;text-decoration:none;
+            background:{% if status_filter == val %}var(--primary){% else %}var(--bg-card){% endif %};
+            color:{% if status_filter == val %}#fff{% else %}var(--text-muted){% endif %};
+            border:1.5px solid {% if status_filter == val %}var(--primary){% else %}var(--border){% endif %};">
+    {{ label }}
+  </a>
+  {% endfor %}
+</div>
+
+<!-- ── Deliveries table ── -->
+<div class="panel-card">
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Customer</th>
+          <th>Items</th>
+          <th>Total</th>
+          <th>Payment</th>
+          <th>Order Status</th>
+          <th>Delivery Status</th>
+          <th>Assigned Staff</th>
+          <th>Delivery Date</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in deliveries %}
+        {% with order=d.order payment=order.payment_set.first %}
+        <tr>
+          <td class="mono" style="font-weight:700;">#{{ order.order_id }}</td>
+          <td>
+            <div style="font-weight:600;">{{ order.customer.cust_name }}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">{{ order.customer.phone }}</div>
+          </td>
+          <td style="text-align:center;">{{ order.items.count }}</td>
+          <td style="font-weight:700;color:var(--primary);">
+            ₹{% with total=0 %}
+              {% for item in order.items.all %}{% endfor %}
+              {{ order.items.all|length }}
+            {% endwith %}
+            <!-- compute total via template tag workaround -->
+            {% with items=order.items.all %}
+              {% for item in items %}{% endfor %}
+            {% endwith %}
+          </td>
+          <td>
+            {% if payment %}
+              <span class="badge-status badge-{{ payment.status }}">{{ payment.get_status_display }}</span>
+              <div style="font-size:.72rem;color:var(--text-muted);margin-top:2px;">{{ payment.get_payment_method_display }}</div>
+            {% else %}—{% endif %}
+          </td>
+          <td>
+            <span class="badge-status badge-{{ order.status }}">{{ order.get_status_display }}</span>
+          </td>
+          <td>
+            {% if d.delivery_status == 'pending' %}
+              <span class="badge-status badge-pending">Pending</span>
+            {% elif d.delivery_status == 'assigned' %}
+              <span class="badge-status" style="background:#dbeafe;color:#1d4ed8;">Assigned</span>
+            {% elif d.delivery_status == 'out_for_delivery' %}
+              <span class="badge-status" style="background:#fef3c7;color:#92400e;">Out for Delivery</span>
+            {% elif d.delivery_status == 'delivered' %}
+              <span class="badge-status badge-completed">Delivered</span>
+            {% elif d.delivery_status == 'failed' %}
+              <span class="badge-status badge-cancelled">Failed</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if d.staff %}
+              <div style="font-weight:600;">{{ d.staff.full_name }}</div>
+              <div style="font-size:.72rem;color:var(--text-muted);">{{ d.staff.phone }}</div>
+            {% else %}
+              <span style="color:var(--text-muted);font-size:.82rem;">Not assigned</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if d.delivery_date %}{{ d.delivery_date }}{% else %}<span style="color:var(--text-muted);">—</span>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'admin_delivery_update' d.delivery_id %}" class="btn-action edit">
+              <i class="bi bi-pencil"></i> Manage
+            </a>
+          </td>
+        </tr>
+        {% endwith %}
+        {% empty %}
+        <tr>
+          <td colspan="10">
+            <div class="empty-state">
+              <i class="bi bi-truck"></i>
+              <p>No deliveries found.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

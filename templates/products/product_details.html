@@ -1,0 +1,810 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ product.product_name }} — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Page hero ────────────────────────────────── */
+.page-hero {
+  background: var(--navy);
+  border-bottom: 3px solid var(--orange);
+  padding: 24px 0 20px;
+}
+.page-hero .breadcrumb { margin: 0; background: none; padding: 0; }
+.page-hero .breadcrumb-item,
+.page-hero .breadcrumb-item a {
+  font-family: 'Inter', sans-serif;
+  font-size: .82rem;
+  color: rgba(255,255,255,.45);
+  text-decoration: none;
+}
+.page-hero .breadcrumb-item.active { color: var(--orange); }
+.page-hero .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.2); }
+
+/* ── Detail layout ────────────────────────────── */
+.detail-section { padding: 40px 0; }
+
+/* ── Image gallery ────────────────────────────── */
+.gallery-wrap { position: sticky; top: 70px; }
+
+.main-img-box {
+  background: var(--bg-soft);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 380px;
+  margin-bottom: 12px;
+}
+.main-img-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  padding: 16px;
+  transition: transform .35s;
+}
+.main-img-box img:hover { transform: scale(1.04); }
+
+.thumb-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.thumb {
+  width: 68px; height: 68px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--bg-soft);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .2s;
+  flex-shrink: 0;
+}
+.thumb img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+.thumb:hover,
+.thumb.active { border-color: var(--orange); }
+
+/* ── Product info ─────────────────────────────── */
+.info-panel { padding-left: 8px; }
+
+.info-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.info-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.info-badge-cat { background: var(--blue-bg); color: var(--blue); }
+.info-badge-brand { background: var(--orange-bg); color: var(--orange); }
+
+.info-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--navy);
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+.info-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.info-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 20px 0;
+}
+
+/* price block */
+.price-block { display: flex; align-items: baseline; gap: 10px; margin-bottom: 20px; }
+.price-main {
+  font-family: 'Nunito', sans-serif;
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--orange);
+}
+.price-tax {
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem;
+  color: var(--muted);
+}
+
+/* meta rows */
+.meta-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: .875rem;
+}
+.meta-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .9rem;
+  color: var(--orange);
+  flex-shrink: 0;
+}
+.meta-label { color: var(--muted); min-width: 90px; }
+.meta-val { color: var(--navy); font-weight: 600; }
+
+/* stock badge */
+.stock-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 14px;
+  border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-size: .78rem;
+  font-weight: 800;
+}
+.stock-badge.in { background: #f0fdf4; color: #16a34a; border: 1.5px solid #bbf7d0; }
+.stock-badge.out { background: #fff0f0; color: #dc2626; border: 1.5px solid #fecaca; }
+.stock-badge i { font-size: .8rem; }
+
+/* ── Action buttons ───────────────────────────── */
+.action-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.btn-cart {
+  flex: 1;
+  padding: 13px;
+  background: var(--white);
+  border: 2px solid var(--navy);
+  border-radius: 10px;
+  color: var(--navy);
+  font-family: 'Nunito', sans-serif;
+  font-size: .95rem;
+  font-weight: 900;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+}
+.btn-cart:hover { background: var(--navy); color: #fff; }
+.btn-buynow {
+  flex: 1;
+  padding: 13px;
+  background: var(--orange);
+  border: 2px solid var(--orange);
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: .95rem;
+  font-weight: 900;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background .2s;
+  box-shadow: 0 4px 16px rgba(244,81,30,.3);
+}
+.btn-buynow:hover { background: var(--orange-dk); border-color: var(--orange-dk); color: #fff; }
+
+.btn-cart.disabled,
+.btn-buynow.disabled {
+  opacity: .45;
+  pointer-events: none;
+}
+
+/* trust strip */
+.trust-strip {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--border);
+  margin-top: 20px;
+}
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem;
+  color: var(--muted);
+}
+.trust-item i { color: var(--orange); font-size: .85rem; }
+
+/* ── Related products ─────────────────────────── */
+.related-section {
+  padding: 48px 0;
+  border-top: 1px solid var(--border);
+}
+.related-section h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.section-bar {
+  width: 40px; height: 3px;
+  background: var(--orange);
+  border-radius: 2px;
+  margin-bottom: 24px;
+}
+
+/* mini product card (related + services) */
+.mini-card {
+  background: var(--white);
+  border-radius: 12px;
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  transition: border-color .25s, box-shadow .25s, transform .25s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.mini-card:hover {
+  border-color: var(--orange);
+  box-shadow: 0 8px 24px rgba(244,81,30,.1);
+  transform: translateY(-4px);
+}
+.mini-img {
+  height: 140px;
+  background: var(--bg-soft);
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.mini-img img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  padding: 8px;
+  transition: transform .3s;
+}
+.mini-card:hover .mini-img img { transform: scale(1.05); }
+.mini-body {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+.mini-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: .875rem;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.3;
+}
+.mini-price {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--orange);
+}
+.btn-mini {
+  display: block;
+  padding: 7px 0;
+  background: var(--navy);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: .78rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 7px;
+  margin-top: auto;
+  transition: background .2s;
+}
+.btn-mini:hover { background: var(--orange); color: #fff; }
+
+/* service mini card */
+.svc-mini-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 20px 18px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transition: border-color .2s, box-shadow .2s;
+}
+.svc-mini-card:hover { border-color: var(--orange); box-shadow: 0 6px 18px rgba(244,81,30,.1); }
+.svc-mini-icon { font-size: 1.4rem; color: var(--orange); }
+.svc-mini-name { font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 900; color: var(--navy); }
+.svc-mini-desc { font-family: 'Inter', sans-serif; font-size: .82rem; color: var(--muted); line-height: 1.5; flex: 1; }
+.svc-mini-rate { font-family: 'Nunito', sans-serif; font-size: .9rem; font-weight: 800; color: var(--orange); }
+
+@media (max-width: 767px) {
+  .info-panel { padding-left: 0; margin-top: 24px; }
+  .gallery-wrap { position: static; }
+  .action-row { flex-direction: column; }
+  .btn-cart, .btn-buynow { flex: none; width: 100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-md-5">
+
+  <!-- ══ PRODUCT DETAIL ══ -->
+  <div class="detail-section">
+    <div class="row">
+
+      <!-- Left: image gallery -->
+      <div class="col-12 col-md-5">
+        <div class="gallery-wrap">
+          <!-- Main image -->
+          <div class="main-img-box">
+            {% if images %}
+              <img src="{{ images.0.image_url.url }}" alt="{{ product.product_name }}" id="mainImg">
+            {% else %}
+              <i class="bi bi-image text-secondary" style="font-size:4rem;"></i>
+            {% endif %}
+          </div>
+          <!-- Thumbnails -->
+          {% if images|length > 1 %}
+          <div class="thumb-row">
+            {% for img in images %}
+            <div class="thumb {% if forloop.first %}active{% endif %}"
+                 onclick="switchImg(this, '{{ img.image_url.url }}')">
+              <img src="{{ img.image_url.url }}" alt="Thumb {{ forloop.counter }}">
+            </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Right: info -->
+      <div class="col-12 col-md-7">
+        <div class="info-panel">
+
+          <!-- Badges -->
+          <div class="info-badges">
+            {% if product.category %}
+            <span class="info-badge info-badge-cat">
+              <i class="bi bi-grid-3x3-gap"></i> {{ product.category.category_name }}
+            </span>
+            {% endif %}
+            {% if product.brand %}
+            <span class="info-badge info-badge-brand">
+              <i class="bi bi-patch-check"></i> {{ product.brand.brand_name }}
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Name -->
+          <h1 class="info-name">{{ product.product_name }}</h1>
+
+          <!-- Description -->
+          {% if product.description %}
+          <p class="info-desc">{{ product.description }}</p>
+          {% endif %}
+
+          <div class="info-divider"></div>
+
+          <!-- Price -->
+          <div class="price-block">
+            <div class="price-main" id="displayPrice">₹{{ product.price }}</div>
+            <div class="price-tax">incl. all taxes</div>
+          </div>
+
+          <!-- ── Variant Selector ─────────────────────────── -->
+          {% if variants %}
+          <div style="margin-bottom:20px;">
+            <div style="font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;
+                        letter-spacing:.08em;text-transform:uppercase;color:var(--navy);margin-bottom:10px;">
+              <i class="bi bi-layers me-1" style="color:var(--orange);"></i>
+              Choose Size / Variant
+              <span id="selectedVariantLabel" style="color:var(--orange);font-size:.8rem;margin-left:8px;"></span>
+            </div>
+            <div class="d-flex gap-2 flex-wrap" id="variantBtns">
+              {% for v in variants %}
+              <button type="button"
+                class="variant-btn"
+                data-variant-id="{{ v.variant_id }}"
+                data-price="{{ v.price }}"
+                data-stock="{{ v.stock_qty }}"
+                data-label="{{ v.label }}"
+                onclick="selectVariant(this)"
+                style="
+                  padding:8px 16px;
+                  border:2px solid var(--border);
+                  border-radius:8px;
+                  background:var(--bg-soft);
+                  font-family:'Nunito',sans-serif;
+                  font-size:.82rem;
+                  font-weight:800;
+                  color:var(--navy);
+                  cursor:pointer;
+                  transition:border-color .2s, background .2s, color .2s;
+                  {% if v.stock_qty == 0 %}opacity:.45;{% endif %}
+                ">
+                {{ v.label }}<br>
+                <span style="color:var(--orange);font-size:.78rem;">₹{{ v.price }}</span>
+                {% if v.stock_qty == 0 %}
+                  <span style="color:#dc2626;font-size:.68rem;display:block;">Out of stock</span>
+                {% endif %}
+              </button>
+              {% endfor %}
+            </div>
+            <small style="font-family:'Inter',sans-serif;font-size:.75rem;color:var(--muted);margin-top:6px;display:block;">
+              <i class="bi bi-info-circle me-1"></i>Select a size/variant to add to cart or buy.
+            </small>
+          </div>
+          {% endif %}
+          <!-- Meta -->
+          <div class="meta-list">
+            {% if product.weight %}
+            <div class="meta-row">
+              <div class="meta-icon"><i class="bi bi-box-seam"></i></div>
+              <span class="meta-label">Weight</span>
+              <span class="meta-val">{{ product.weight }} L.</span>
+            </div>
+            {% endif %}
+            {% if product.expiry_date %}
+            <div class="meta-row">
+              <div class="meta-icon"><i class="bi bi-calendar-check"></i></div>
+              <span class="meta-label">Expiry Date</span>
+              <span class="meta-val">{{ product.expiry_date }}</span>
+            </div>
+            {% endif %}
+            <div class="meta-row">
+              <div class="meta-icon"><i class="bi bi-archive"></i></div>
+              <span class="meta-label">Availability</span>
+              <span id="stockBadge">
+              {% if product.stock_qty > 0 %}
+              <span class="stock-badge in"><i class="bi bi-check-circle-fill"></i> In Stock ({{ product.stock_qty }} left)</span>
+              {% else %}
+              <span class="stock-badge out"><i class="bi bi-x-circle-fill"></i> Out of Stock</span>
+              {% endif %}
+              </span>
+            </div>
+          </div>
+          
+          {% if product_colors %}
+            <div style="margin-bottom:16px;">
+              <div style="font-family:'Nunito',sans-serif;font-size:.75rem;font-weight:800;
+                          letter-spacing:.08em;text-transform:uppercase;color:var(--navy);margin-bottom:10px;">
+                <i class="bi bi-palette me-1" style="color:var(--orange);"></i>
+                Choose Colour
+                <span id="selectedColorLabel" style="color:var(--orange);font-size:.8rem;margin-left:8px;font-weight:700;text-transform:none;letter-spacing:0;"></span>
+              </div>
+              <div class="d-flex gap-2 flex-wrap">
+                {% for pc in product_colors %}
+                <button type="button"
+                  class="color-swatch"
+                  data-color-id="{{ pc.color.color_id }}"
+                  data-color-name="{{ pc.color.color_name }}"
+                  onclick="selectColor(this)"
+                  title="{{ pc.color.color_name }}"
+                  style="
+                    width:36px;height:36px;border-radius:50%;
+                    background:{{ pc.color.color_code }};
+                    border:3px solid #ccc;
+                    cursor:pointer;
+                    padding:0;
+                    transition:border-color .2s, transform .15s, box-shadow .2s;
+                    flex-shrink:0;
+                  ">
+                </button>
+                {% endfor %}
+              </div>
+              <small style="font-family:'Inter',sans-serif;font-size:.75rem;color:var(--muted);margin-top:6px;display:block;">
+                <i class="bi bi-info-circle me-1"></i>Click a colour to select it.
+              </small>
+            </div>
+          {% endif %}
+          <!-- Action buttons -->
+          {% if product.stock_qty > 0 %}
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'add_to_cart' product.product_id %}" id="cartForm">
+              {% csrf_token %}
+              <input type="hidden" name="color_id"   id="cartColorId"   value="">
+              <input type="hidden" name="variant_id" id="cartVariantId" value="">
+              <div class="action-row" id="actionRow">
+                <button type="submit" class="btn-cart" id="btnAddCart">
+                  <i class="bi bi-bag-plus"></i> Add to Cart
+                </button>
+                <button type="button" class="btn-buynow" id="btnBuyNow" onclick="buyNow()">
+                  <i class="bi bi-lightning-charge-fill"></i> Buy Now
+                </button>
+              </div>
+            </form>
+            <form method="post" action="{% url 'buy_now' product.product_id %}" id="buyNowForm" style="display:none;">
+              {% csrf_token %}
+              <input type="hidden" name="color_id"   id="buyNowColorId"   value="">
+              <input type="hidden" name="variant_id" id="buyNowVariantId" value="">
+            </form>
+            {% else %}
+            <div class="action-row">
+              <a href="{% url 'login' %}?next={{ request.path }}" class="btn-cart">
+                <i class="bi bi-bag-plus"></i> Add to Cart
+              </a>
+              <a href="{% url 'login' %}?next={{ request.path }}" class="btn-buynow">
+                <i class="bi bi-lightning-charge-fill"></i> Buy Now
+              </a>
+            </div>
+            {% endif %}
+          {% else %}
+          <div class="action-row">
+            <span class="btn-cart disabled"><i class="bi bi-bag-plus"></i> Add to Cart</span>
+            <span class="btn-buynow disabled"><i class="bi bi-lightning-charge-fill"></i> Buy Now</span>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ RELATED PRODUCTS ══ -->
+  {% if products %}
+  <div class="related-section">
+    <h2>You May Also Like</h2>
+    <div class="section-bar"></div>
+    <div class="row g-3">
+      {% for p in products %}
+      <div class="col-6 col-md-3">
+        <div class="mini-card">
+          <div class="mini-img">
+            {% if p.primary_image %}
+              <img src="/media/{{ p.primary_image }}" alt="{{ p.product_name }}">
+            {% else %}
+              <i class="bi bi-image text-secondary fs-2"></i>
+            {% endif %}
+          </div>
+          <div class="mini-body">
+            <div class="mini-name">{{ p.product_name }}</div>
+            <div class="mini-price">₹{{ p.price }}</div>
+            <a href="{% url 'product_detail' p.product_id %}" class="btn-mini">View Details</a>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ══ SERVICES ══ -->
+  {% if services %}
+  <div class="related-section" style="border-top: 1px solid var(--border);">
+    <h2>Our Services</h2>
+    <div class="section-bar"></div>
+    <div class="row g-3">
+      {% for service in services %}
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="svc-mini-card">
+          <div class="svc-mini-icon"><i class="bi bi-brush"></i></div>
+          <div class="svc-mini-name">{{ service.service_name }}</div>
+          {% if service.description %}
+          <div class="svc-mini-desc">{{ service.description }}</div>
+          {% endif %}
+          <div class="svc-mini-rate">₹{{ service.price_per_sq }} / sq.ft</div>
+          <a href="{% url 'login' %}" class="btn-mini" style="align-self:flex-start; padding:7px 16px; width:auto;">
+            Book Now <i class="bi bi-arrow-right ms-1"></i>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ══ FEEDBACK & REVIEWS ══ -->
+  {% if feedbacks %}
+  <div class="related-section">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h2>Customer Reviews</h2>
+        <div class="section-bar" style="margin-bottom: 0;"></div>
+      </div>
+      {% if user.is_authenticated and not user_has_reviewed %}
+      <a href="{% url 'add_feedback' product.product_id %}" class="btn-mini" style="align-self:flex-start; padding:8px 16px; width:auto; background: var(--orange); border:none;">
+        <i class="bi bi-star"></i> Write a Review
+      </a>
+      {% endif %}
+    </div>
+
+    <div class="row g-3">
+      {% for feedback in feedbacks %}
+      <div class="col-12">
+        <div class="card border-0 shadow-sm" style="background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 16px;">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <div class="d-flex align-items-center gap-2">
+              <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--bg-soft); display: flex; align-items: center; justify-content: center; font-weight: 900; color: var(--navy);">
+                {{ feedback.customer.cust_name|first|upper }}
+              </div>
+              <div>
+                <div style="font-family: 'Nunito', sans-serif; font-weight: 800; font-size: .95rem; color: var(--navy);">
+                  {{ feedback.customer.cust_name }}
+                </div>
+                <div style="font-family: 'Inter', sans-serif; font-size: .72rem; color: var(--muted);">
+                  {{ feedback.created_at|date:"d M Y" }}
+                </div>
+              </div>
+            </div>
+            <div style="color: var(--orange); font-size: .9rem;">
+              {% for i in "12345" %}
+                {% if forloop.counter <= feedback.rating %}
+                  <i class="bi bi-star-fill"></i>
+                {% else %}
+                  <i class="bi bi-star"></i>
+                {% endif %}
+              {% endfor %}
+            </div>
+          </div>
+          {% if feedback.comments %}
+          <p style="font-family: 'Inter', sans-serif; font-size: .88rem; color: var(--text); line-height: 1.6; margin-bottom: 0;">
+            {{ feedback.comments }}
+          </p>
+          {% else %}
+          <p style="font-family: 'Inter', sans-serif; font-size: .88rem; color: var(--muted); font-style: italic; margin-bottom: 0;">
+            No comment provided.
+          </p>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% else %}
+  <!-- No feedback but show CTA for authenticated users -->
+  {% if user.is_authenticated %}
+  <div class="related-section" style="padding: 48px 0; border-top: 1px solid var(--border); text-align: center;">
+    <i class="bi bi-chat-square-text" style="font-size: 3rem; color: var(--border); margin-bottom: 12px;"></i>
+    <h3 style="font-family: 'Nunito', sans-serif; font-weight: 900; color: var(--navy); margin-bottom: 6px;">No Reviews Yet</h3>
+    <p style="font-family: 'Inter', sans-serif; font-size: .9rem; color: var(--muted); margin-bottom: 16px;">
+      Be the first to review this product!
+    </p>
+    <a href="{% url 'add_feedback' product.product_id %}" class="btn-mini" style="display: inline-block; padding: 10px 24px; width: auto; background: var(--orange); border: none; color: white; text-decoration: none;">
+      <i class="bi bi-star"></i> Write a Review
+    </a>
+  </div>
+  {% endif %}
+  {% endif %}
+
+</div>
+
+<script>
+// ── Image gallery ─────────────────────────────────────────────────
+function switchImg(thumb, url) {
+  document.getElementById('mainImg').src = url;
+  document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
+  thumb.classList.add('active');
+}
+
+// ── Colour picker ─────────────────────────────────────────────────
+function selectColor(btn) {
+  // Reset all swatches
+  document.querySelectorAll('.color-swatch').forEach(b => {
+    b.style.borderColor = '#ccc';
+    b.style.transform   = 'scale(1)';
+    b.style.boxShadow   = 'none';
+  });
+
+  // Highlight selected
+  btn.style.borderColor = 'var(--orange)';
+  btn.style.transform   = 'scale(1.18)';
+  btn.style.boxShadow   = '0 0 0 3px rgba(244,81,30,.25)';
+
+  const id   = btn.dataset.colorId;
+  const name = btn.dataset.colorName;
+
+  // Update label
+  const label = document.getElementById('selectedColorLabel');
+  if (label) label.textContent = '— ' + name;
+
+  // Sync hidden inputs in both forms
+  const cartInput   = document.getElementById('cartColorId');
+  const buyNowInput = document.getElementById('buyNowColorId');
+  if (cartInput)   cartInput.value   = id;
+  if (buyNowInput) buyNowInput.value = id;
+}
+
+// ── Variant picker ────────────────────────────────────────────────
+// Data from Django: base stock & whether there are any variants
+const HAS_VARIANTS   = {{ variants|yesno:"true,false" }};
+const BASE_STOCK     = {{ product.stock_qty }};
+const BASE_PRICE     = {{ product.price }};
+
+function selectVariant(btn) {
+  // Deselect all
+  document.querySelectorAll('.variant-btn').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.background  = 'var(--bg-soft)';
+    b.style.color       = 'var(--navy)';
+  });
+
+  // Highlight selected
+  btn.style.borderColor = 'var(--orange)';
+  btn.style.background  = 'var(--orange-bg, #fff5f2)';
+  btn.style.color       = 'var(--orange)';
+
+  const variantId = btn.dataset.variantId;
+  const price     = parseFloat(btn.dataset.price);
+  const stock     = parseInt(btn.dataset.stock);
+  const label     = btn.dataset.label;
+
+  // Update price display
+  document.getElementById('displayPrice').textContent = '₹' + price.toFixed(2);
+
+  // Update label
+  const lbl = document.getElementById('selectedVariantLabel');
+  if (lbl) lbl.textContent = '— ' + label;
+
+  // Update stock badge
+  updateStockBadge(stock);
+
+  // Update hidden fields in both forms
+  const cv = document.getElementById('cartVariantId');
+  const bv = document.getElementById('buyNowVariantId');
+  if (cv) cv.value = variantId;
+  if (bv) bv.value = variantId;
+
+  // Enable/disable action buttons based on this variant's stock
+  toggleActionButtons(stock > 0);
+}
+
+function updateStockBadge(qty) {
+  const el = document.getElementById('stockBadge');
+  if (!el) return;
+  if (qty > 0) {
+    el.innerHTML = `<span class="stock-badge in"><i class="bi bi-check-circle-fill"></i> In Stock (${qty} left)</span>`;
+  } else {
+    el.innerHTML = `<span class="stock-badge out"><i class="bi bi-x-circle-fill"></i> Out of Stock</span>`;
+  }
+}
+
+function toggleActionButtons(enabled) {
+  const cart   = document.getElementById('btnAddCart');
+  const buyNow = document.getElementById('btnBuyNow');
+  if (!cart || !buyNow) return;
+  if (enabled) {
+    cart.classList.remove('disabled');
+    buyNow.classList.remove('disabled');
+    cart.disabled   = false;
+    buyNow.disabled = false;
+  } else {
+    cart.classList.add('disabled');
+    buyNow.classList.add('disabled');
+    cart.disabled   = true;
+    buyNow.disabled = true;
+  }
+}
+
+// If product has variants, disable action buttons until a variant is chosen
+document.addEventListener('DOMContentLoaded', function () {
+  if (HAS_VARIANTS) {
+    toggleActionButtons(false);
+    document.getElementById('displayPrice').textContent = 'Select a variant';
+    document.getElementById('displayPrice').style.fontSize = '1.1rem';
+    document.getElementById('displayPrice').style.color = 'var(--muted)';
+  }
+});
+
+// ── Buy Now ───────────────────────────────────────────────────────
+function buyNow() {
+  const cartColorId   = document.getElementById('cartColorId');
+  const cartVariantId = document.getElementById('cartVariantId');
+  if (cartColorId)   document.getElementById('buyNowColorId').value   = cartColorId.value;
+  if (cartVariantId) document.getElementById('buyNowVariantId').value = cartVariantId.value;
+  document.getElementById('buyNowForm').submit();
+}
+</script>
+
+{% endblock %}

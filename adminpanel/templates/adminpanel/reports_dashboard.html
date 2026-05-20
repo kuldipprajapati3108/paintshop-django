@@ -1,0 +1,71 @@
+{% extends "adminpanel/base_admin.html" %}
+{% block title %}Reports Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h2>Reports Dashboard</h2>
+    <div class="breadcrumb-sub">
+      <a href="{% url 'admin_dashboard' %}" style="color: var(--text-muted); text-decoration:none;">Dashboard</a>
+      <span style="margin: 0 6px; color: var(--text-muted);">›</span>
+      Reports Dashboard
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="bi bi-people"></i></div>
+      <div>
+        <div class="stat-value">{{ total_customers|default:"0" }}</div>
+        <div class="stat-label">Total Customers</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card">
+      <div class="stat-icon orange"><i class="bi bi-cart3"></i></div>
+      <div>
+        <div class="stat-value">{{ total_orders|default:"0" }}</div>
+        <div class="stat-label">Total Orders</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6 col-xl-4">
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="bi bi-calendar-check"></i></div>
+      <div>
+        <div class="stat-value">{{ total_bookings|default:"0" }}</div>
+        <div class="stat-label">Total Bookings</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-12">
+    <div class="panel-card">
+      <div class="panel-card-header">
+        <h5><i class="bi bi-info-circle"></i> About Reports</h5>
+      </div>
+      <div class="panel-card-body">
+        <p>Select a report type to view detailed data:</p>
+        <div class="d-flex gap-3 flex-wrap mt-3">
+          <a href="/admin_panel/reports/customers/" class="btn-action add">
+            <i class="bi bi-people"></i> Customer Report
+          </a>
+          <a href="/admin_panel/reports/orders/" class="btn-action add">
+            <i class="bi bi-cart3"></i> Order Report
+          </a>
+          <a href="/admin_panel/reports/bookings/" class="btn-action add">
+            <i class="bi bi-calendar-check"></i> Booking Report
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

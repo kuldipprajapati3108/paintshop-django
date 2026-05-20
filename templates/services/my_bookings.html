@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Bookings — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-hero { padding:28px 0 24px;  }
+.page-hero h1 { font-family:'Nunito',sans-serif; font-size:1.8rem; font-weight:900; margin:0; }
+.page-hero p { font-family:'Inter',sans-serif; font-size:.95rem; opacity:.9; margin:8px 0 0; }
+
+.bookings-container { padding:36px 0 56px; }
+
+.booking-card {
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:14px; margin-bottom:16px; transition:box-shadow .2s;
+}
+.booking-card:hover { box-shadow:0 6px 20px rgba(0,0,0,.08); }
+
+.booking-header {
+  padding:18px 24px;
+  border-bottom:1px solid var(--border);
+  display:flex; justify-content:space-between; align-items:center;
+  flex-wrap:wrap; gap:12px;
+}
+.booking-title {
+  font-family:'Nunito',sans-serif; font-size:1.1rem; font-weight:900; color:var(--navy);
+  display:flex; align-items:center; gap:10px;
+}
+.booking-id { font-family:'Inter',sans-serif; font-size:.85rem; font-weight:500; color:var(--muted); margin-left:8px; }
+.booking-status {
+  padding:6px 14px; border-radius:20px; font-family:'Nunito',sans-serif;
+  font-size:.75rem; font-weight:800; text-transform:uppercase;
+}
+.status-pending { background:#fef3c7; color:#92400e; }
+.status-confirmed { background:#dbeafe; color:#1e40af; }
+.status-in_progress { background:#e0e7ff; color:#3730a3; }
+.status-completed { background:#d1fae5; color:#065f46; }
+.status-cancelled { background:#fee2e2; color:#991b1b; }
+.status-rescheduled { background:#fce7f3; color:#9d174d; }
+
+.booking-body { padding:20px 24px; }
+
+.booking-grid {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:24px;
+  margin-bottom:16px;
+}
+
+.info-item { margin-bottom:12px; }
+.info-label {
+  font-family:'Nunito',sans-serif; font-size:.7rem; font-weight:800;
+  color:var(--muted); text-transform:uppercase; letter-spacing:.05em;
+  margin-bottom:4px;
+}
+.info-value {
+  font-family:'Inter',sans-serif; font-size:.9rem; font-weight:600; color:var(--text);
+}
+
+.color-display { display:inline-flex; align-items:center; gap:6px; }
+.color-swatch {
+  width:18px; height:18px; border-radius:50%; border:1.5px solid rgba(0,0,0,.1);
+  display:inline-block;
+}
+.price-tag {
+  font-family:'Nunito',sans-serif; font-size:1.3rem; font-weight:900; color:var(--orange);
+}
+.price-label {
+  font-family:'Inter',sans-serif; font-size:.8rem; color:var(--muted);
+}
+
+/* Actions */
+.booking-actions {
+  display:flex; gap:10px; flex-wrap:wrap;
+  margin-top:16px; padding-top:16px; border-top:1px solid var(--border);
+}
+.btn-action {
+  padding:8px 16px; border:none; border-radius:8px; font-family:'Nunito',sans-serif;
+  font-size:.85rem; font-weight:800; cursor:pointer; text-decoration:none;
+  display:inline-flex; align-items:center; gap:6px; transition:all .2s;
+}
+.btn-view { background:var(--blue-bg); color:var(--blue); }
+.btn-view:hover { background:var(--blue-lt); color:#fff; }
+.btn-primary { background:var(--navy); color:#fff; }
+.btn-primary:hover { background:var(--navy-soft); }
+
+.empty-state {
+  text-align:center; padding:60px 20px;
+}
+.empty-icon {
+  font-size:4rem; color:var(--border); margin-bottom:16px;
+}
+.empty-state h3 {
+  font-family:'Nunito',sans-serif; font-size:1.3rem; font-weight:900; color:var(--navy);
+  margin-bottom:8px;
+}
+.empty-state p {
+  font-family:'Inter',sans-serif; color:var(--muted); max-width:400px; margin:0 auto 20px;
+}
+
+@media(max-width:768px) {
+  .booking-header { flex-direction:column; align-items:flex-start; }
+  .booking-grid { grid-template-columns:1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container-fluid px-4 px-md-5">
+    <h1><i class="bi bi-calendar-check-fill me-2" style="color:var(--orange);"></i>My Bookings</h1>
+    <p>View and manage your service bookings</p>
+  </div>
+</div>
+
+<div class="container-fluid px-4 px-md-5 bookings-container">
+  {% if bookings %}
+    {% for booking in bookings %}
+    <div class="booking-card">
+      <div class="booking-header">
+        <div class="booking-title">
+          <i class="bi bi-brush-fill" style="color:var(--orange);"></i>
+          {{ booking.service.service_name }}
+          <span class="booking-id">#{{ booking.booking_id }}</span>
+        </div>
+        <span class="booking-status status-{{ booking.status }}">
+          {{ booking.get_status_display }}
+        </span>
+      </div>
+
+      <div class="booking-body">
+        <div class="booking-grid">
+          <div>
+            
+            <div class="info-item">
+              <div class="info-label">Area</div>
+              <div class="info-value">{{ booking.area_sqft }} sq.ft</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Service Date</div>
+              <div class="info-value">{{ booking.service_date|date:"l, F j, Y" }}</div>
+            </div>
+          </div>
+          <div>
+            <div class="info-item">
+              <div class="info-label">Booking Date</div>
+              <div class="info-value">{{ booking.booked_at|date:"F j, Y, g:i a" }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Address</div>
+              <div class="info-value" style="max-width:300px;">{{ booking.address|truncatechars:100 }}</div>
+            </div>
+            <div class="info-item">
+              <div class="info-label">Assigned Staff</div>
+              <div class="info-value">
+                {% if booking.staff %}
+                  {{ booking.staff.full_name }}
+                {% else %}
+                  <span style="color:var(--muted);">— Not assigned yet —</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="booking-actions">
+          <a href="{% url 'booking_success' booking_id=booking.booking_id %}" class="btn-action btn-view">
+            <i class="bi bi-eye"></i> View Details
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📋</div>
+      <h3>No Bookings Yet</h3>
+      <p>You haven't made any service bookings. Get started by booking your first painting service!</p>
+      <a href="{% url 'booking' %}" class="btn-action btn-primary" style="display:inline-flex; width:auto; padding:12px 28px;">
+        <i class="bi bi-calendar-check"></i> Book a Service
+      </a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

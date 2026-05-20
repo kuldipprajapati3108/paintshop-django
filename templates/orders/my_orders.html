@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}My Orders — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+.orders-wrap { padding: 36px 0 56px; }
+
+.page-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.4rem; font-weight: 900; color: var(--navy);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 4px;
+}
+.page-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: .82rem; color: var(--muted); margin-bottom: 20px;
+}
+
+.filters { display: flex; gap: 8px; margin-bottom: 22px; flex-wrap: wrap; }
+.filter-btn {
+  padding: 5px 14px; border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: .78rem; font-weight: 700;
+  border: 1.5px solid var(--border); background: var(--white);
+  color: var(--muted); cursor: pointer; transition: all .15s;
+}
+.filter-btn:hover { border-color: var(--orange); color: var(--orange); }
+.filter-btn.active { background: var(--orange-bg); color: var(--orange); border-color: var(--orange); }
+
+.order-card {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden;
+  margin-bottom: 14px; transition: border-color .2s;
+}
+.order-card:hover { border-color: var(--orange); }
+
+.ohead {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; background: var(--bg-soft);
+  border-bottom: 1.5px solid var(--border); flex-wrap: wrap;
+}
+.oid { font-family: 'Nunito', sans-serif; font-size: .9rem; font-weight: 800; color: var(--navy); }
+.odate { font-family: 'Inter', sans-serif; font-size: .75rem; color: var(--muted); margin-top: 1px; }
+.ototal { font-family: 'Nunito', sans-serif; font-size: .95rem; font-weight: 900; color: var(--orange); margin-left: auto; }
+
+.badge {
+  display: inline-block; padding: 2px 9px; border-radius: 20px;
+  font-family: 'Nunito', sans-serif; font-size: .68rem; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.b-pending    { background: #fef3c7; color: #92400e; }
+.b-confirmed  { background: #dbeafe; color: #1e40af; }
+.b-processing { background: #ede9fe; color: #5b21b6; }
+.b-shipped    { background: #d1fae5; color: #065f46; }
+.b-completed  { background: #dcfce7; color: #166534; }
+.b-cancelled  { background: #fee2e2; color: #991b1b; }
+.b-returned   { background: #fce7f3; color: #9d174d; }
+.b-paid       { background: #dcfce7; color: #166534; }
+.b-cod        { background: #fef3c7; color: #92400e; }
+.b-upi        { background: #ede9fe; color: #5b21b6; }
+
+.obody { padding: 12px 16px; }
+.oitem {
+  display: flex; align-items: center; gap: 12px;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.oitem:last-child { border-bottom: none; }
+.thumb {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg-soft); overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.thumb img { width: 100%; height: 100%; object-fit: contain; padding: 4px; }
+.iname { font-family: 'Nunito', sans-serif; font-size: .85rem; font-weight: 800; color: var(--navy); }
+.imeta {
+  font-family: 'Inter', sans-serif; font-size: .73rem; color: var(--muted);
+  margin-top: 2px; display: flex; align-items: center; gap: 6px;
+}
+.cdot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid var(--border); display: inline-block; flex-shrink: 0; }
+.iprice { margin-left: auto; font-family: 'Nunito', sans-serif; font-size: .88rem; font-weight: 900; color: var(--orange); flex-shrink: 0; }
+
+.ofoot {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border-top: 1.5px solid var(--border);
+  background: var(--bg-soft); flex-wrap: wrap;
+}
+.finfo { display: flex; align-items: center; gap: 5px; font-family: 'Inter', sans-serif; font-size: .75rem; color: var(--muted); }
+.finfo strong { color: var(--navy); font-weight: 600; }
+.btn-invoice {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border: 1.5px solid var(--border);
+  border-radius: 8px; font-family: 'Nunito', sans-serif;
+  font-size: .78rem; font-weight: 700; color: var(--navy);
+  background: var(--white); text-decoration: none;
+  transition: border-color .2s, color .2s;
+}
+.btn-invoice:hover { border-color: var(--orange); color: var(--orange); }
+.btn-invoice.disabled { opacity: .4; pointer-events: none; }
+
+.empty-orders { text-align: center; padding: 64px 20px; }
+.empty-orders i { font-size: 3rem; color: var(--border); display: block; margin-bottom: 14px; }
+.empty-orders p { font-family: 'Inter', sans-serif; font-size: .9rem; color: var(--muted); }
+.btn-shop-now {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 24px; background: var(--orange); color: #fff;
+  border-radius: var(--r-sm); font-family: 'Nunito', sans-serif;
+  font-size: .88rem; font-weight: 800; text-decoration: none;
+  margin-top: 16px; transition: background .2s;
+}
+.btn-shop-now:hover { background: var(--orange-dk); color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 px-md-5">
+  <div class="orders-wrap">
+
+    <div class="page-title"><i class="bi bi-bag" style="color:var(--orange);"></i> My Orders</div>
+    <div class="page-sub">All your orders in one place</div>
+
+    {% if order_data %}
+
+    <!-- Filter tabs -->
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterOrders('all', this)">All</button>
+      <button class="filter-btn" onclick="filterOrders('pending', this)">Pending</button>
+      <button class="filter-btn" onclick="filterOrders('confirmed', this)">Confirmed</button>
+      <button class="filter-btn" onclick="filterOrders('completed', this)">Completed</button>
+      <button class="filter-btn" onclick="filterOrders('cancelled', this)">Cancelled</button>
+    </div>
+
+    {% for entry in order_data %}
+    {% with order=entry.order items=entry.items payment=entry.payment delivery=entry.delivery can_review_count=entry.can_review_count %}
+    <div class="order-card" data-status="{{ order.status }}">
+
+      <!-- Head -->
+      <div class="ohead">
+        <div>
+          <div class="oid">Order #{{ order.order_id }}</div>
+          <div class="odate">{{ order.order_date|date:"d M Y, h:i A" }}</div>
+        </div>
+        <span class="badge b-{{ order.status }}">{{ order.get_status_display }}</span>
+        {% if payment %}
+          <span class="badge b-{{ payment.payment_method }}">{{ payment.get_payment_method_display }}</span>
+          <span class="badge b-{{ payment.status }}">{{ payment.get_status_display }}</span>
+        {% endif %}
+        <div class="ototal">₹{{ order.total_amount }}</div>
+      </div>
+
+      <!-- Items -->
+      <div class="obody">
+        {% for item in items %}
+        <div class="oitem">
+          <div class="thumb">
+            {% if item.product.primary_image %}
+              <img src="/media/{{ item.product.primary_image }}" alt="{{ item.product.product_name }}">
+            {% else %}
+              <i class="bi bi-image" style="color:var(--muted);"></i>
+            {% endif %}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div class="iname">{{ item.product.product_name }}</div>
+            <div class="imeta">
+              Qty: {{ item.quantity }}
+              {% if item.color %}
+                &nbsp;·&nbsp;
+                <span class="cdot" style="background:{{ item.color.color_code }};"></span>
+                {{ item.color.color_name }}
+              {% endif %}
+            </div>
+          </div>
+          <div class="iprice">₹{{ item.price }}</div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Footer -->
+      <div class="ofoot">
+        {% if delivery %}
+          {% if delivery.delivery_status == 'delivered' and delivery.delivery_date %}
+            <div class="finfo">
+              <i class="bi bi-check-circle-fill" style="color:var(--orange);font-size:.8rem;"></i>
+              Delivered on <strong>{{ delivery.delivery_date|date:"d M Y" }}</strong>
+            </div>
+          {% elif delivery.delivery_date %}
+            <div class="finfo">
+              <i class="bi bi-truck" style="color:var(--orange);font-size:.8rem;"></i>
+              Expected <strong>{{ delivery.delivery_date|date:"d M Y" }}</strong>
+            </div>
+          {% elif order.status == 'pending' %}
+            <div class="finfo" style="color:#92400e;">
+              <i class="bi bi-clock" style="color:#f59e0b;font-size:.8rem;"></i>
+              Awaiting confirmation
+            </div>
+          {% endif %}
+        {% endif %}
+
+
+        <a href="{% url 'download_invoice' order.order_id %}" class="btn-invoice">
+          <i class="bi bi-file-earmark-arrow-down" style="font-size:.85rem;"></i> Invoice
+        </a>
+        {% if can_review_count > 0 %}
+        <a href="{% url 'order_feedback' order.order_id %}" class="btn-invoice" style="margin-left: 6px; background: #f0fdf4; border-color: #bbf7d0; color: #166534;">
+          <i class="bi bi-star" style="font-size:.85rem;"></i> Review ({{ can_review_count }})
+        </a>
+        {% endif %}
+      </div>
+
+    </div>
+    {% endwith %}
+    {% endfor %}
+
+    {% else %}
+    <div class="empty-orders">
+      <i class="bi bi-bag-x"></i>
+      <p>You haven't placed any orders yet.</p>
+      <a href="{% url 'product_list' %}" class="btn-shop-now">
+        <i class="bi bi-grid"></i> Start Shopping
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterOrders(status, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.order-card').forEach(card => {
+    card.style.display = (status === 'all' || card.dataset.status === status) ? 'block' : 'none';
+  });
+}
+</script>
+{% endblock %}

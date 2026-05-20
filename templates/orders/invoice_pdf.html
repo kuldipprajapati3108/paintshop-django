@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { margin: 35px 40px; size: A4; }
+
+  body {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    color: #1a1918;
+    line-height: 1.5;
+  }
+
+  /* ── Header ── */
+  .header-table { width: 100%; margin-bottom: 20px; }
+  .shop-name    { font-size: 20px; font-weight: bold; color: #0d1b3e;}
+  .shop-sub     { font-size: 10px; color: #6e6860;}
+  .inv-title    { font-size: 22px; font-weight: bold; color: #f4511e; text-align: right; }
+  .inv-meta     { font-size: 10px; color: #6e6860; text-align: right; margin-top: 3px; }
+
+  /* ── Divider ── */
+  .divider { border-top: 2px solid #f4511e; margin: 14px 0; }
+
+  /* ── Billed to / Order details ── */
+  .info-table { width: 100%; margin-bottom: 20px; }
+  .info-table td { vertical-align: top; width: 50%; }
+  .label { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: #6e6860; margin-bottom: 3px; }
+  .value { font-size: 13px; font-weight: bold; color: #0d1b3e; }
+  .right-col { text-align: right; }
+
+  /* ── Items table ── */
+  .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+  .items-table thead tr { background-color: #0d1b3e; }
+  .items-table thead th {
+    color: #ffffff;
+    padding: 5px 10px;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    text-align: left;
+  }
+  .items-table tbody td {
+    padding: 5px 10px;
+    border-bottom: 1px solid #dedad4;
+    font-size: 11px;
+    vertical-align: middle;
+  }
+  .items-table tbody tr:last-child td { border-bottom: none; }
+  .col-num     { width: 4%; }
+  .col-product { width: 40%; }
+  .col-color   { width: 15%; }
+  .col-qty     { width: 8%;  text-align: center; }
+  .col-price   { width: 15%; text-align: right; }
+  .col-sub     { width: 18%; text-align: right; }
+
+  /* ── Total box ── */
+  .total-wrap  { text-align: right; margin-bottom: auto; }
+  .total-box   {
+    display: flex;
+    justify-content: space-between;
+    border: 1.5px solid #f4511e;
+    border-radius: 6px;
+    padding: 10px 18px;
+    min-width: 180px;
+  }
+  .total-label { font-size: 13px; color: #6e6860; }
+  .total-value { font-size: 15px; font-weight: bold; color: #f4511e; margin-top: 2px; }
+
+  /* ── Footer ── */
+.footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 9px;
+  color: #6e6860;
+  border-top: 1px solid #dedad4;
+  padding-top: 10px;
+  background-color: #fff; /* Prevents text behind it from showing through */
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<table class="header-table">
+  <tr>
+    <td>
+      <span class="shop-name">Shree Shankar Traders</span><br>
+      <span class="shop-sub">Shop No.9, Ambicanagar, Isanpur, Ahmedabad - 382443
+        <br> +91 98249 93188 | shreeshankartraders@gmail.com</span>
+    </td>
+    <td style="text-align:right; vertical-align:top;">
+      <span class="inv-title">INVOICE</span><br>
+      <span class="inv-meta">Invoice No: {{ invoice.invoice_number }}<br>
+        Invoice Date: {{ invoice.invoice_date|date:"d M Y" }}</span>
+    </td>
+  </tr>
+</table>
+
+<div class="divider"><br></div>
+
+<!-- Billed to + Order details -->
+<table class="info-table">
+  <tr>
+    <td>
+      <div class="label">Billed to</div>
+      <span class="value">Name: {{ customer.cust_name }}</span><br>
+      <span>
+        Phone: {{ customer.phone }}<br>
+        Email: {{ customer.email }}</span><br>
+      <span style="color:#6e6860; margin-top:3px;">Address: {{ customer.address }}</span>
+    </td>
+    <td class="right-col">
+      <div class="label">Order details</div>
+      <span class="value">Order Id: #{{ order.order_id }}</span><br>
+      <span>
+        Order Date: {{ order.order_date|date:"d M Y" }}<br>
+        Payment Method: {{ payment.get_payment_method_display }}<br> 
+        Payment Status: {{ payment.get_status_display }}
+      </span>
+    </td>
+  </tr>
+</table>
+
+<br>
+
+<!-- Items -->
+<table class="items-table">
+  <thead>
+    <tr>
+      <th class="col-num">No. </th>
+      <th class="col-product">Product</th>
+      <th class="col-color">Color</th>
+      <th class="col-qty">Qty</th>
+      <th class="col-price">Unit Price</th>
+      <th class="col-sub">Subtotal</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for item in items %}
+    <tr>
+      <td class="col-num">{{ forloop.counter }}</td>
+      <td class="col-product">{{ item.product.product_name }}</td>
+      <td class="col-color">{{ item.color.color_name|default:"-" }}</td>
+      <td class="col-qty" style="text-align:center;">{{ item.quantity }}</td>
+      <td class="col-price" style="text-align:right;">{{ item.price }}</td>
+      <td class="col-sub"  style="text-align:right;">{{ item.subtotal }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- Total -->
+<div class="total-wrap">
+  <div class="total-box">
+    <span class="total-label">Total Amount &nbsp &nbsp &nbsp &nbsp &nbsp</span>
+    <span class="total-value">Rs. {{ order.total_amount }}</span>
+  </div>
+</div>
+
+<!-- Footer -->
+<div class="footer">
+  Thank you for shopping with Shree Shankar Traders. This is a computer-generated invoice.
+</div>
+
+</body>
+</html>

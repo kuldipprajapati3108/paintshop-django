@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Login — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-wrap {
+    min-height: calc(100vh - 73px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-soft);
+    padding: 40px 16px;
+  }
+
+  .auth-card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 24px rgba(13,27,62,.08);
+  }
+
+  .auth-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .auth-logo-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--navy);
+  }
+  .auth-logo-name span { color: var(--orange); }
+
+  .auth-card h2 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .auth-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: .875rem;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .auth-sub a {
+    color: var(--orange);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .auth-divider {
+    width: 40px;
+    height: 3px;
+    background: var(--orange);
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+
+  .auth-label {
+    font-family: 'Nunito', sans-serif;
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--navy);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .auth-field { margin-bottom: 18px; }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap .field-icon {
+    position: absolute;
+    left: 13px;
+    color: var(--muted);
+    font-size: .95rem;
+    pointer-events: none;
+  }
+  .input-wrap input {
+    width: 100%;
+    padding: 11px 13px 11px 38px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: .9rem;
+    color: var(--text);
+    background: var(--bg-soft);
+    outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  .input-wrap input:focus {
+    border-color: var(--orange);
+    background: var(--white);
+  }
+  .input-wrap input::placeholder { color: #bbb4ac; }
+
+  .toggle-btn {
+    position: absolute;
+    right: 11px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .95rem;
+    padding: 2px;
+    transition: color .2s;
+  }
+  .toggle-btn:hover { color: var(--orange); }
+  .input-wrap input.has-toggle { padding-right: 38px; }
+
+  .auth-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--orange);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: .95rem;
+    font-weight: 900;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: background .2s;
+  }
+  .auth-btn:hover { background: var(--orange-dk); }
+
+  .auth-alert {
+    background: #fff0f0;
+    border: 1.5px solid #fca5a5;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #991b1b;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+
+    <h2>Sign In</h2>
+    <div class="auth-divider"></div>
+    <p class="auth-sub">New here? <a href="{% url 'register' %}">Create an account</a></p>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="auth-alert">
+          <i class="bi bi-exclamation-circle-fill"></i> {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" autocomplete="off">
+      {% csrf_token %}
+
+      <div class="auth-field">
+        <label class="auth-label" for="username">Username</label>
+        <div class="input-wrap">
+          <i class="bi bi-person field-icon"></i>
+          <input type="text" id="username" name="username" placeholder="Enter your username" required>
+        </div>
+      </div>
+
+      <div class="auth-field">
+        <label class="auth-label" for="password">Password</label>
+        <div class="input-wrap">
+          <i class="bi bi-lock field-icon"></i>
+          <input type="password" id="password" name="password" class="has-toggle" placeholder="Enter your password" required>
+          <button type="button" class="toggle-btn" onclick="togglePass('password', this)">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" class="auth-btn">
+        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+      </button>
+    </form>
+
+  </div>
+</div>
+
+<script>
+function togglePass(id, btn) {
+  const input = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'bi bi-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'bi bi-eye';
+  }
+}
+</script>
+{% endblock %}

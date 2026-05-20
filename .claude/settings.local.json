@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//mnt/c/Users/Jay/OneDrive/Desktop/**)",
+      "Bash(python manage.py check)"
+    ]
+  }
+}

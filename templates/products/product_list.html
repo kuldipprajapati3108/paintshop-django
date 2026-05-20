@@ -1,0 +1,541 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Products — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Products heading ─────────────────────────── */
+.products-heading {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--navy);
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--orange);
+  display: inline-block;
+}
+
+/* ── Layout ───────────────────────────────────── */
+.products-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+  padding: 36px 0;
+}
+
+/* ── Sidebar ──────────────────────────────────── */
+.filter-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 58px; /* below subnav */
+}
+.filter-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 18px 14px;
+  border-bottom: 1.5px solid var(--border);
+}
+.filter-header-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: .9rem;
+  font-weight: 900;
+  color: var(--navy);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.filter-header-title i { color: var(--orange); }
+.filter-clear {
+  font-family: 'Inter', sans-serif;
+  font-size: .75rem;
+  color: var(--orange);
+  text-decoration: none;
+  font-weight: 600;
+}
+.filter-clear:hover { text-decoration: underline; }
+
+.filter-section {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.filter-section:last-child { border-bottom: none; }
+.filter-section-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+/* checkbox items */
+.filter-check {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 0;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: .855rem;
+  color: var(--text);
+  transition: color .15s;
+}
+.filter-check:hover { color: var(--orange); }
+.filter-check input[type="radio"],
+.filter-check input[type="checkbox"] {
+  accent-color: var(--orange);
+  width: 15px; height: 15px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+/* price range */
+.price-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+.price-input {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: .82rem;
+  color: var(--text);
+  background: var(--bg-soft);
+  outline: none;
+  transition: border-color .2s;
+  width: 0; /* let flex handle width */
+}
+.price-input:focus { border-color: var(--orange); }
+.price-sep { font-size: .8rem; color: var(--muted); flex-shrink: 0; }
+
+/* apply button */
+.filter-apply {
+  width: 100%;
+  padding: 9px;
+  margin-top: 10px;
+  background: var(--orange);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: .82rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: background .2s;
+}
+.filter-apply:hover { background: var(--orange-dk); }
+
+/* in-stock toggle */
+.stock-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+.stock-toggle-label {
+  font-family: 'Inter', sans-serif;
+  font-size: .855rem;
+  color: var(--text);
+}
+.form-switch .form-check-input { accent-color: var(--orange); cursor: pointer; }
+
+/* ── Product grid ─────────────────────────────── */
+.products-main { flex: 1; min-width: 0; }
+
+.products-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.products-count {
+  font-family: 'Inter', sans-serif;
+  font-size: .875rem;
+  color: var(--muted);
+}
+.products-count strong { color: var(--navy); font-weight: 700; }
+
+/* active filter chips */
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: var(--orange-bg);
+  border: 1.5px solid rgba(244,81,30,.25);
+  border-radius: 50px;
+  font-family: 'Nunito', sans-serif;
+  font-size: .75rem;
+  font-weight: 800;
+  color: var(--orange);
+  text-decoration: none;
+}
+.filter-chip i { font-size: .7rem; }
+.filter-chip:hover { background: #ffe0d6; color: var(--orange-dk); }
+
+/* product card */
+.product-card {
+  background: var(--white);
+  border-radius: 14px;
+  border: 2px solid transparent;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  transition: transform .25s, box-shadow .25s, border-color .25s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 32px rgba(244,81,30,.13);
+  border-color: var(--orange);
+}
+.product-img-wrap {
+  height: 170px;
+  background: var(--bg-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.product-img-wrap img {
+  width: 100%; height: 100%;
+  object-fit: contain;
+  padding: 10px;
+  transition: transform .35s;
+}
+.product-card:hover .product-img-wrap img { transform: scale(1.06); }
+
+.product-img-wrap::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--orange), var(--yellow));
+  transform: scaleX(0);
+  transition: transform .25s;
+}
+.product-card:hover .product-img-wrap::after { transform: scaleX(1); }
+
+.product-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+}
+.product-badge {
+  font-family: 'Nunito', sans-serif;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+.product-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: .9rem;
+  font-weight: 800;
+  color: var(--navy);
+  line-height: 1.3;
+}
+.product-price {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--orange);
+  margin-top: auto;
+}
+.out-of-stock { color: var(--muted); font-size: .75rem; font-family: 'Inter', sans-serif; }
+.btn-view {
+  display: block;
+  padding: 8px 0;
+  background: var(--navy);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: .82rem;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 8px;
+  margin-top: 6px;
+  transition: background .2s;
+}
+.btn-view:hover { background: var(--orange); color: #fff; }
+
+/* empty state */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+}
+.empty-state i { font-size: 3rem; margin-bottom: 12px; color: var(--border-dk); }
+.empty-state p { font-size: .95rem; }
+
+/* ── Services section ─────────────────────────── */
+.services-row-section {
+  padding: 48px 0 56px;
+  border-top: 1px solid var(--border);
+}
+.services-row-section h2 {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 4px;
+}
+.services-bar {
+  width: 40px; height: 3px;
+  background: var(--orange);
+  border-radius: 2px;
+  margin-bottom: 28px;
+}
+.service-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 24px 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: border-color .25s, box-shadow .25s;
+}
+.service-card:hover {
+  border-color: var(--orange);
+  box-shadow: 0 6px 20px rgba(244,81,30,.1);
+}
+.service-icon {
+  font-size: 1.6rem;
+  color: var(--orange);
+  margin-bottom: 4px;
+}
+.service-name {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--navy);
+}
+.service-desc {
+  font-family: 'Inter', sans-serif;
+  font-size: .84rem;
+  color: var(--muted);
+  line-height: 1.55;
+  flex: 1;
+}
+.service-rate {
+  font-family: 'Nunito', sans-serif;
+  font-size: .95rem;
+  font-weight: 800;
+  color: var(--orange);
+}
+.btn-book {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--navy);
+  color: #fff;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: .82rem;
+  font-weight: 800;
+  text-decoration: none;
+  margin-top: 4px;
+  transition: background .2s;
+  align-self: flex-start;
+}
+.btn-book:hover { background: var(--orange); color: #fff; }
+
+/* ── Responsive ───────────────────────────────── */
+@media (max-width: 900px) {
+  .filter-sidebar { display: none; }
+}
+@media (max-width: 575px) {
+  .products-layout { padding: 20px 0; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-4 px-md-5">
+  <form method="get" id="filterForm">
+    <div class="products-layout">
+
+      <!-- ══ SIDEBAR ══ -->
+      <aside class="filter-sidebar">
+        <div class="filter-card">
+
+          <div class="filter-header">
+            <div class="filter-header-title"><i class="bi bi-funnel-fill"></i> Filters</div>
+            <a href="{% url 'product_list' %}" class="filter-clear">Clear all</a>
+          </div>
+
+          <!-- Categories -->
+          <div class="filter-section">
+            <div class="filter-section-title">Category</div>
+            <label class="filter-check">
+              <input type="radio" name="category" value=""
+                {% if not active_category %}checked{% endif %}
+                onchange="document.getElementById('filterForm').submit()">
+              All Categories
+            </label>
+            {% for cat in categories %}
+            <label class="filter-check">
+              <input type="radio" name="category" value="{{ cat.category_id }}"
+                {% if active_category == cat.category_id|stringformat:"s" %}checked{% endif %}
+                onchange="document.getElementById('filterForm').submit()">
+              {{ cat.category_name }}
+            </label>
+            {% endfor %}
+          </div>
+
+          <!-- Brands -->
+          <div class="filter-section">
+            <div class="filter-section-title">Brand</div>
+            <label class="filter-check">
+              <input type="radio" name="brand" value=""
+                {% if not active_brand %}checked{% endif %}
+                onchange="document.getElementById('filterForm').submit()">
+              All Brands
+            </label>
+            {% for brand in brands %}
+            <label class="filter-check">
+              <input type="radio" name="brand" value="{{ brand.brand_id }}"
+                {% if active_brand == brand.brand_id|stringformat:"s" %}checked{% endif %}
+                onchange="document.getElementById('filterForm').submit()">
+              {{ brand.brand_name }}
+            </label>
+            {% endfor %}
+          </div>
+
+          <!-- Price range -->
+          <div class="filter-section">
+            <div class="filter-section-title">Price Range (₹)</div>
+            <div class="price-inputs">
+              <input type="number" name="min_price" class="price-input" placeholder="Min" value="{{ min_price }}" min="0">
+              <span class="price-sep">–</span>
+              <input type="number" name="max_price" class="price-input" placeholder="Max" value="{{ max_price }}" min="0">
+            </div>
+            <button type="submit" class="filter-apply">Apply Price</button>
+          </div>
+
+          <!-- In Stock -->
+          <div class="filter-section">
+            <div class="filter-section-title">Availability</div>
+            <div class="stock-toggle">
+              <span class="stock-toggle-label">In Stock Only</span>
+              <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" name="in_stock" value="1"
+                  {% if in_stock %}checked{% endif %}
+                  onchange="document.getElementById('filterForm').submit()">
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- ══ MAIN GRID ══ -->
+      <div class="products-main">
+
+        <h2 class="products-heading">All Products</h2>
+
+        <!-- Toolbar -->
+        <div class="products-toolbar">
+          <div class="products-count">
+            Showing <strong>{{ products|length }}</strong> product{{ products|length|pluralize }}
+          </div>
+        </div>
+
+        <!-- Grid -->
+        {% if products %}
+        <div class="row g-3">
+          {% for product in products %}
+          <div class="col-6 col-md-4 col-lg-3">
+            <div class="product-card">
+              <div class="product-img-wrap">
+                {% if product.primary_image %}
+                  <img src="/media/{{ product.primary_image }}" alt="{{ product.product_name }}">
+                {% else %}
+                  <i class="bi bi-image text-secondary fs-1"></i>
+                {% endif %}
+              </div>
+              <div class="product-body">
+                {% if product.brand %}
+                  <div class="product-badge">{{ product.brand.brand_name }}</div>
+                {% elif product.category %}
+                  <div class="product-badge">{{ product.category.category_name }}</div>
+                {% endif %}
+                <div class="product-name">{{ product.product_name }}</div>
+                <div class="product-price">₹{{ product.price }}</div>
+                {% if product.stock_qty == 0 %}
+                  <div class="out-of-stock"><i class="bi bi-x-circle me-1"></i>Out of stock</div>
+                {% endif %}
+                <a href="{% url 'product_detail' product.product_id %}" class="btn-view">View Details</a>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty-state">
+          <i class="bi bi-search d-block"></i>
+          <p>No products match your filters.<br>
+            <a href="{% url 'product_list' %}" style="color:var(--orange);font-weight:600;">Clear filters</a>
+          </p>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </form>
+
+  <!-- Services -->
+  <div class="services-row-section">
+    <h2>Our Services</h2>
+    <div class="services-bar"></div>
+    <div class="row g-3">
+      {% for service in services %}
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="service-card">
+          <div class="service-icon"><i class="bi bi-brush"></i></div>
+          <div class="service-name">{{ service.service_name }}</div>
+          {% if service.description %}
+          <div class="service-desc">{{ service.description }}</div>
+          {% endif %}
+          <div class="service-rate">₹{{ service.price_per_sq }} / sq.ft</div>
+          <a href="{% url 'login' %}" class="btn-book">Book Now <i class="bi bi-arrow-right"></i></a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

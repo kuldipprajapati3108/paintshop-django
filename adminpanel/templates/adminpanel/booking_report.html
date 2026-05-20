@@ -1,0 +1,64 @@
+{% extends "adminpanel/base_admin.html" %}
+{% load admin_extras %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <div>
+    <h2>{{ title }}</h2>
+    <div class="breadcrumb-sub">
+      <a href="{% url 'admin_dashboard' %}" style="color: var(--text-muted); text-decoration:none;">Dashboard</a>
+      <span style="margin: 0 6px; color: var(--text-muted);">›</span>
+      <a href="/admin_panel/reports/" style="color: var(--text-muted); text-decoration:none;">Reports</a>
+      <span style="margin: 0 6px; color: var(--text-muted);">›</span>
+      Booking Report
+    </div>
+  </div>
+  <a href="/admin_panel/reports/" class="btn-action add">
+    <i class="bi bi-arrow-left"></i> Back to Reports
+  </a>
+</div>
+
+<div class="panel-card">
+  <div class="table-responsive">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>Booking ID</th>
+          <th>Customer</th>
+          <th>Service</th>
+          <th>Service Date</th>
+          <th>Status</th>
+          <th>Staff</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in bookings %}
+        <tr>
+          <td class="mono">#{{ booking.booking_id }}</td>
+          <td>{{ booking.customer.cust_name }}</td>
+          <td>{{ booking.service.service_name|default:"N/A" }}</td>
+          <td>{{ booking.service_date|date:"M d, Y" }}</td>
+          <td>
+            <span class="badge-status badge-{{ booking.status }}">{{ booking.status }}</span>
+          </td>
+          <td>{{ booking.staff.full_name|default:"Unassigned" }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6">
+            <div class="empty-state">
+              <i class="bi bi-calendar"></i>
+              <p>No bookings found.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

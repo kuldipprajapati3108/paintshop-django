@@ -1,0 +1,190 @@
+{% extends 'staff/base_staff.html' %}
+{% load static %}
+{% block title %}Update Delivery — Staff Panel{% endblock %}
+{% block header_title %}Update Delivery Status{% endblock %}
+
+{% block extra_css %}
+<style>
+.update-card {
+  background:var(--white); border:1.5px solid var(--border); border-radius:14px;
+  overflow:hidden; margin-bottom:24px;
+}
+.card-section {
+  border-bottom:1px solid var(--border);
+}
+.card-section-header {
+  background:var(--bg-soft); padding:12px 20px;
+  font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:800;
+  color:var(--navy); text-transform:uppercase; letter-spacing:.05em;
+  display:flex; align-items:center; gap:8px;
+}
+.card-section-body {
+  padding:20px;
+}
+
+.form-grid {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:20px;
+}
+
+.form-group { margin-bottom:16px; }
+.form-group:last-child { margin-bottom:0; }
+.form-label {
+  font-family:'Nunito',sans-serif; font-size:.8rem; font-weight:800;
+  color:var(--navy); text-transform:uppercase; letter-spacing:.05em;
+  margin-bottom:6px; display:block;
+}
+.form-select, .form-input {
+  width:100%; padding:11px 14px;
+  border:1.5px solid var(--border); border-radius:10px;
+  font-family:'Inter',sans-serif; font-size:.95rem; color:var(--text);
+  background:var(--white); outline:none; transition:border-color .2s;
+}
+.form-select:focus, .form-input:focus {
+  border-color:var(--orange); box-shadow:0 0 0 3px rgba(244,81,30,.1);
+}
+.form-hint {
+  font-family:'Inter',sans-serif; font-size:.8rem; color:var(--muted);
+  margin-top:6px; font-size:.75rem;
+}
+
+.order-summary-grid {
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px;
+}
+.summary-item { margin-bottom:12px; }
+.summary-label {
+  font-family:'Nunito',sans-serif; font-size:.7rem; font-weight:800;
+  color:var(--muted); text-transform:uppercase; letter-spacing:.05em;
+  margin-bottom:4px;
+}
+.summary-value {
+  font-family:'Inter',sans-serif; font-size:.95rem; font-weight:600; color:var(--text);
+}
+
+.btn-submit {
+  width:100%; padding:12px; border:none; border-radius:10px;
+  background:var(--orange); color:#fff; font-family:'Nunito',sans-serif;
+  font-size:1rem; font-weight:900; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+  transition:background .2s;
+}
+.btn-submit:hover { background:var(--orange-dk); }
+
+.breadcrumb-nav {
+  display:flex; align-items:center; gap:8px; margin-bottom:20px;
+  font-family:'Inter',sans-serif; font-size:.9rem; color:var(--muted);
+}
+.breadcrumb-nav a { color:var(--blue); text-decoration:none; }
+.breadcrumb-nav a:hover { text-decoration:underline; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb-nav">
+  <a href="{% url 'staff_dashboard' %}">Dashboard</a>
+  <i class="bi bi-chevron-right" style="font-size:.7rem;"></i>
+  <a href="{% url 'staff_deliveries' %}">Deliveries</a>
+  <i class="bi bi-chevron-right" style="font-size:.7rem;"></i>
+  <span>Update #{{ delivery.delivery_id }}</span>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 350px; gap:24px;">
+  <!-- Left - Form -->
+  <div>
+    <div class="update-card">
+      <div class="card-section">
+        <div class="card-section-header">
+          <i class="bi bi-pencil"></i> Delivery Details
+        </div>
+        <div class="card-section-body">
+          <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+              <label class="form-label">Delivery Status</label>
+              <select name="delivery_status" class="form-select" required>
+                {% for value, label in status_choices %}
+                  <option value="{{ value }}" {% if delivery.delivery_status == value %}selected{% endif %}>
+                    {{ label }}
+                  </option>
+                {% endfor %}
+              </select>
+              <div class="form-hint">Update the delivery status</div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Delivery Notes <span style="color:var(--muted); font-weight:400;">(optional)</span></label>
+              <textarea name="delivery_notes" class="form-input" rows="3"
+                        placeholder="Add any notes about this delivery..."></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit">
+              <i class="bi bi-check"></i> Update Delivery
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right - Summary -->
+  <div>
+    <div class="update-card">
+      <div class="card-section">
+        <div class="card-section-header">
+          <i class="bi bi-info-circle"></i> Order Summary
+        </div>
+        <div class="card-section-body">
+          <div class="order-summary-grid">
+            <div class="summary-item">
+              <div class="summary-label">Order ID</div>
+              <div class="summary-value">#{{ order.order_id }}</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Customer</div>
+              <div class="summary-value">{{ delivery.order.customer.cust_name }}</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Phone</div>
+              <div class="summary-value">{{ delivery.order.customer.phone }}</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Address</div>
+              <div class="summary-value" style="max-width:250px;">{{ delivery.delivery_address|truncatechars:80 }}</div>
+            </div>
+            <div class="summary-item">
+              <div class="summary-label">Current Status</div>
+              <div class="summary-value">
+                <span class="booking-status status-{{ delivery.delivery_status }}">
+                  {{ delivery.get_delivery_status_display }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-section">
+        <div class="card-section-header">
+          <i class="bi bi-box-seam"></i> Items
+        </div>
+        <div class="card-section-body" style="padding:0;">
+          {% for item in items %}
+          <div style="padding:12px 20px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-weight:600; color:var(--navy); font-size:.9rem;">{{ item.product.product_name }}</div>
+              <div style="font-size:.8rem; color:var(--muted);">
+                Qty: {{ item.quantity }} × ₹{{ item.price }}
+              </div>
+            </div>
+            <div style="font-weight:900; color:var(--orange);">₹{{ item.subtotal }}</div>
+          </div>
+          {% endfor %}
+          <div style="padding:12px 20px; background:var(--bg-soft); font-weight:900; color:var(--navy);">
+            Total: ₹{{ total }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

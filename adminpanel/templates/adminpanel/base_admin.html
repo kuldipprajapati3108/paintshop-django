@@ -1,0 +1,67 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Admin Panel{% endblock %} — PaintShop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'adminpanel/admin.css' %}">
+  <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+</head>
+<body>
+
+<nav class="admin-navbar">
+  <a class="brand" href="{% url 'admin_dashboard' %}">
+    <img src="{% static 'images/round_logo.png' %}" alt="Logo">
+    <span class="brand-name">Shree Shankar Traders</span>
+    <span class="brand-badge">Admin</span>
+  </a>
+
+  <div class="navbar-actions">
+    {% if user.is_authenticated %}
+      <div class="navbar-user">
+        <div class="user-avatar">{{ user.username|first|upper }}</div>
+        <span>{{ user.username }}</span>
+      </div>
+      <a href="/" class="btn-nav" title="View live site">
+        <i class="bi bi-globe"></i> View Site
+      </a>
+      <form method="post" action="{% url 'logout' %}" style="margin:0">
+        {% csrf_token %}
+        <button class="btn-nav danger" type="submit">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</nav>
+
+<div class="admin-layout">
+
+  <aside class="admin-sidebar">
+    {% include 'adminpanel/sidebar.html' %}
+  </aside>
+
+  <main class="admin-content">
+
+    {% if messages %}
+      <div style="margin-bottom: 1rem;">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert"
+               style="border-radius: 10px; font-size: 0.875rem; padding: 10px 16px;">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

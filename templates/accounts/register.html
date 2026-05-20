@@ -1,0 +1,340 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Register — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+  .auth-wrap {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-soft);
+    padding: 40px 16px;
+  }
+
+  .auth-card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 4px 24px rgba(13,27,62,.08);
+  }
+
+  .auth-card h2 {
+    font-family: 'Nunito', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+  .auth-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: .875rem;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+  .auth-sub a {
+    color: var(--orange);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .auth-divider {
+    width: 40px;
+    height: 3px;
+    background: var(--orange);
+    border-radius: 2px;
+    margin-bottom: 16px;
+  }
+
+  .auth-label {
+    font-family: 'Nunito', sans-serif;
+    font-size: .8rem;
+    font-weight: 800;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--navy);
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .auth-field { margin-bottom: 18px; }
+
+  .input-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .input-wrap .field-icon {
+    position: absolute;
+    left: 13px;
+    color: var(--muted);
+    font-size: .95rem;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .input-wrap .field-icon.top {
+    top: 12px;
+    align-self: flex-start;
+  }
+  .input-wrap input,
+  .input-wrap textarea {
+    width: 100%;
+    padding: 11px 13px 11px 38px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: .9rem;
+    color: var(--text);
+    background: var(--bg-soft);
+    outline: none;
+    transition: border-color .2s, background .2s;
+  }
+  .input-wrap textarea {
+    resize: none;
+    height: 134px;
+    align-self: flex-start;
+    padding-top: 11px;
+  }
+  .input-wrap input:focus,
+  .input-wrap textarea:focus {
+    border-color: var(--orange);
+    background: var(--white);
+  }
+  .input-wrap input::placeholder,
+  .input-wrap textarea::placeholder { color: #bbb4ac; }
+
+  .toggle-btn {
+    position: absolute;
+    right: 11px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: .95rem;
+    padding: 2px;
+    transition: color .2s;
+  }
+  .toggle-btn:hover { color: var(--orange); }
+  .input-wrap input.has-toggle { padding-right: 38px; }
+
+  #registerCarousel .carousel-inner {
+  min-height: 405px;
+}
+#registerCarousel .carousel-item {
+  min-height: 405px;
+}
+
+  /* Step dots */
+  .step-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background .3s, width .3s;
+  }
+  .step-dot.active {
+    background: var(--orange);
+    width: 24px;
+    border-radius: 4px;
+  }
+
+  .auth-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--orange);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-size: .95rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .auth-btn:hover { background: var(--orange-dk); }
+
+  .auth-btn-outline {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--navy);
+    font-family: 'Nunito', sans-serif;
+    font-size: .95rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .auth-btn-outline:hover { border-color: var(--navy); background: var(--bg-soft); }
+
+  .auth-alert {
+    background: #fff0f0;
+    border: 1.5px solid #fca5a5;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #991b1b;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  @media (max-width: 480px) {
+    .auth-card { padding: 28px 20px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+  <div class="auth-card">
+
+    <h2>Create Account</h2>
+    <div class="auth-divider"></div>
+    <p class="auth-sub">Already have an account? <a href="{% url 'login' %}">Sign in</a></p>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="auth-alert">
+          <i class="bi bi-exclamation-circle-fill"></i> {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post" action="{% url 'register' %}" autocomplete="off">
+      {% csrf_token %}
+
+      <div id="registerCarousel" class="carousel slide" data-bs-ride="false" data-bs-touch="false">
+        <div class="carousel-inner">
+
+          <!-- Step 1 -->
+          <div class="carousel-item active">
+
+            <div class="auth-field">
+              <label class="auth-label" for="fullname">Full Name</label>
+              <div class="input-wrap">
+                <i class="bi bi-person field-icon"></i>
+                <input type="text" id="fullname" name="fullname" placeholder="Your full name" value="{{ form_data.fullname }}">
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-label" for="username">Username</label>
+              <div class="input-wrap">
+                <i class="bi bi-at field-icon"></i>
+                <input type="text" id="username" name="username" placeholder="Choose a username" value="{{ form_data.username }}">
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-label" for="password">Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock field-icon"></i>
+                <input type="password" id="password" name="password" class="has-toggle" placeholder="Minimum 8 characters">
+                <button type="button" class="toggle-btn" onclick="togglePass('password', this)"><i class="bi bi-eye"></i></button>
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-label" for="confirm_password">Confirm Password</label>
+              <div class="input-wrap">
+                <i class="bi bi-lock-fill field-icon"></i>
+                <input type="password" id="confirm_password" name="confirm_password" class="has-toggle" placeholder="Repeat your password">
+                <button type="button" class="toggle-btn" onclick="togglePass('confirm_password', this)"><i class="bi bi-eye"></i></button>
+              </div>
+            </div>
+
+            <button type="button" class="auth-btn" onclick="goNext()">
+              Next <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+
+          </div>
+
+          <!-- Step 2 -->
+          <div class="carousel-item">
+
+            <div class="auth-field">
+              <label class="auth-label" for="mobile">Mobile</label>
+              <div class="input-wrap">
+                <i class="bi bi-phone field-icon"></i>
+                <input type="text" id="mobile" name="mobile" placeholder="10-digit number" value="{{ form_data.mobile }}" maxlength="10">
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-label" for="email">Email</label>
+              <div class="input-wrap">
+                <i class="bi bi-envelope field-icon"></i>
+                <input type="email" id="email" name="email" placeholder="you@example.com" value="{{ form_data.email }}">
+              </div>
+            </div>
+
+            <div class="auth-field">
+              <label class="auth-label" for="address">
+                Address <span style="text-transform:none;letter-spacing:0;font-weight:600;color:var(--muted);">(optional)</span>
+              </label>
+              <div class="input-wrap">
+                <i class="bi bi-geo-alt field-icon top"></i>
+                <textarea id="address" name="address" placeholder="Your delivery address">{{ form_data.address }}</textarea>
+              </div>
+            </div>
+
+            <div class="d-flex gap-2">
+              <button type="button" class="auth-btn-outline"
+                      data-bs-target="#registerCarousel" data-bs-slide="prev"
+                      onclick="goPrev()">
+                <i class="bi bi-arrow-left me-1"></i> Back
+              </button>
+              <button type="submit" class="auth-btn">
+                <i class="bi bi-person-check me-1"></i> Register
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+<script>
+function togglePass(id, btn) {
+  const input = document.getElementById(id);
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'bi bi-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'bi bi-eye';
+  }
+}
+
+function goNext() {
+  bootstrap.Carousel.getOrCreateInstance(document.getElementById('registerCarousel')).next();
+  document.getElementById('dot1').classList.remove('active');
+  document.getElementById('dot2').classList.add('active');
+}
+
+function goPrev() {
+  document.getElementById('dot2').classList.remove('active');
+  document.getElementById('dot1').classList.add('active');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,424 @@
+/* ================================================================
+   AUTH PAGES — Shree Shankar Traders
+   Login & Register — Split-screen bold layout
+================================================================ */
+
+/* ── Full screen wrapper ─────────────────────────────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LEFT PANEL — Branded side
+════════════════════════════════════════════════════════════════ */
+.auth-left {
+  width: 44%;
+  background: var(--navy);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 48px 52px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* layered background blobs */
+.auth-left::before {
+  content: '';
+  position: absolute;
+  top: -80px; right: -80px;
+  width: 320px; height: 320px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(244,81,30,.35) 0%, transparent 70%);
+  pointer-events: none;
+}
+.auth-left::after {
+  content: '';
+  position: absolute;
+  bottom: -100px; left: -60px;
+  width: 380px; height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,193,7,.12) 0%, transparent 65%);
+  pointer-events: none;
+}
+
+/* paint-stroke diagonal accent */
+.auth-left-stripe {
+  position: absolute;
+  top: 0; right: 0;
+  width: 6px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--orange), var(--yellow), var(--orange-lt));
+}
+
+/* top: logo */
+.auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  z-index: 2;
+}
+.auth-brand-icon {
+  width: 50px; height: 50px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.08);
+  border: 1.5px solid rgba(255,255,255,.14);
+  display: flex; align-items: center; justify-content: center;
+}
+.auth-brand-text { display: flex; flex-direction: column; gap: 2px; }
+.auth-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+}
+.auth-brand-name span { color: var(--orange); }
+.auth-brand-sub {
+  font-family: 'Nunito', sans-serif;
+  font-size: .65rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+}
+
+/* middle: headline + features */
+.auth-hero { position: relative; z-index: 2; }
+.auth-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(244,81,30,.18);
+  border: 1px solid rgba(244,81,30,.35);
+  color: var(--orange-lt);
+  font-family: 'Nunito', sans-serif;
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 50px;
+  margin-bottom: 22px;
+}
+.auth-pill i { font-size: .8rem; }
+
+.auth-headline {
+  font-family: 'Nunito', sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.12;
+  margin-bottom: 18px;
+}
+.auth-headline span {
+  color: var(--yellow);
+  position: relative;
+}
+.auth-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  color: rgba(255,255,255,.55);
+  line-height: 1.7;
+  margin-bottom: 36px;
+}
+
+/* feature list */
+.auth-features { display: flex; flex-direction: column; gap: 14px; }
+.auth-feature {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.auth-feature-icon {
+  width: 36px; height: 36px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem;
+  flex-shrink: 0;
+}
+.auth-feature:nth-child(1) .auth-feature-icon { color: var(--orange); }
+.auth-feature:nth-child(2) .auth-feature-icon { color: var(--yellow); }
+.auth-feature:nth-child(3) .auth-feature-icon { color: #4ade80; }
+.auth-feature-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  color: rgba(255,255,255,.7);
+}
+
+/* bottom: address */
+.auth-address {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Inter', sans-serif;
+  font-size: .78rem;
+  color: rgba(255,255,255,.3);
+  position: relative;
+  z-index: 2;
+}
+.auth-address i { color: var(--orange); font-size: .85rem; }
+
+
+/* ════════════════════════════════════════════════════════════════
+   RIGHT PANEL — Form side
+════════════════════════════════════════════════════════════════ */
+.auth-right {
+  flex: 1;
+  background: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px;
+  overflow-y: auto;
+}
+.auth-form-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+
+/* form header */
+.auth-form-header { margin-bottom: 36px; }
+.auth-form-eyebrow {
+  font-family: 'Nunito', sans-serif;
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 8px;
+}
+.auth-form-title {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.9rem;
+  font-weight: 900;
+  color: var(--navy);
+  line-height: 1.15;
+  margin: 0 0 8px;
+}
+.auth-form-sub {
+  font-family: 'Inter', sans-serif;
+  font-size: .875rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.auth-form-sub a {
+  color: var(--orange);
+  font-weight: 600;
+  text-decoration: none;
+}
+.auth-form-sub a:hover { text-decoration: underline; }
+
+/* divider under title */
+.auth-title-line {
+  width: 44px; height: 4px;
+  background: linear-gradient(90deg, var(--orange), var(--yellow));
+  border-radius: 2px;
+  margin: 14px 0 0;
+}
+
+/* ── Form fields ─────────────────────────────────────────────── */
+.auth-field { margin-bottom: 20px; }
+.auth-label {
+  display: block;
+  font-family: 'Nunito', sans-serif;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--navy);
+  margin-bottom: 8px;
+}
+.auth-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.auth-input-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--muted);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: color .2s;
+  z-index: 2;
+}
+.auth-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  border: 2px solid var(--border);
+  border-radius: var(--r);
+  background: var(--white);
+  font-family: 'Inter', sans-serif;
+  font-size: .9rem;
+  color: var(--text);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.auth-input::placeholder { color: #b8b2aa; }
+.auth-input:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 4px rgba(244,81,30,.1);
+}
+.auth-input-wrap:focus-within .auth-input-icon { color: var(--orange); }
+
+/* textarea variant */
+textarea.auth-input {
+  padding-top: 12px;
+  resize: none;
+  padding-left: 42px;
+  min-height: 90px;
+}
+
+/* password toggle */
+.auth-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 1rem;
+  line-height: 1;
+  transition: color .2s;
+  z-index: 2;
+}
+.auth-toggle-btn:hover { color: var(--orange); }
+
+/* input with toggle needs right padding */
+.auth-input.has-toggle { padding-right: 42px; }
+
+/* ── Step indicator (register) ───────────────────────────────── */
+.auth-steps {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 32px;
+}
+.auth-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+.auth-step-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--white);
+  color: var(--muted);
+  font-family: 'Nunito', sans-serif;
+  font-size: .82rem;
+  font-weight: 900;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: background .3s, border-color .3s, color .3s;
+}
+.auth-step-label {
+  font-family: 'Nunito', sans-serif;
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--muted);
+  transition: color .3s;
+}
+.auth-step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  margin: 0 8px;
+  border-radius: 1px;
+  transition: background .3s;
+}
+
+/* active step */
+.auth-step.active .auth-step-num {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+}
+.auth-step.active .auth-step-label { color: var(--navy); font-weight: 800; }
+
+/* completed step */
+.auth-step.done .auth-step-num {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+.auth-step.done + .auth-step-line { background: #22c55e; }
+.auth-step.done .auth-step-label { color: #22c55e; }
+
+/* ── Submit button ───────────────────────────────────────────── */
+.auth-submit {
+  width: 100%;
+  padding: 13px;
+  background: var(--orange);
+  border: none;
+  border-radius: var(--r);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 4px 20px rgba(244,81,30,.35);
+  margin-top: 8px;
+}
+.auth-submit:hover {
+  background: var(--orange-dk);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(244,81,30,.45);
+}
+.auth-submit:active { transform: translateY(0); }
+
+/* secondary (back/next) button */
+.auth-btn-secondary {
+  width: 100%;
+  padding: 13px;
+  background: var(--white);
+  border: 2px solid var(--border);
+  border-radius: var(--r);
+  color: var(--navy);
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: border-color .2s, background .2s;
+}
+.auth-btn-secondary:hover { border-color: var(--navy); background: var(--bg-soft); }
+
+/* ── Error alerts ────────────────────────────────────────────── */
+.auth-alert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--r-sm);
+  background: #fff0f0;
+  border: 1.5px solid #fca5a5;
+  color: #991b1b;
+  font-family: 'Nunito', sans-serif;
+  font-size: .85rem;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+.auth-alert i { color: #ef4444; font-size: 1rem; flex-shrink: 0; }
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .auth-left { display: none; }
+  .auth-right { padding: 40px 24px; }
+}
+@media (max-width: 480px) {
+  .auth-right { padding: 32px 16px; align-items: flex-start; }
+  .auth-form-wrap { max-width: 100%; }
+}

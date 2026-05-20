@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Book a Service — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-hero { padding:28px 0 24px; background:linear-gradient(135deg, var(--navy) 0%, var(--navy-soft) 100%); color:#fff; }
+.page-hero h1 { font-family:'Nunito',sans-serif; font-size:1.8rem; font-weight:900; margin:0; }
+.page-hero p { font-family:'Inter',sans-serif; font-size:.95rem; opacity:.9; margin:8px 0 0; }
+
+.booking-layout { display:flex; gap:28px; align-items:flex-start; padding:36px 0 56px; }
+.booking-form   { flex:1; min-width:0; }
+.booking-summary{ width:380px; flex-shrink:0; position:sticky; top:70px; }
+
+.booking-card {
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:14px; overflow:hidden; margin-bottom:20px;
+}
+.booking-card-header {
+  background:var(--navy); padding:14px 20px;
+  font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:900; color:#fff;
+  display:flex; align-items:center; gap:8px;
+}
+.booking-card-body { padding:20px; }
+
+.form-label-styled {
+  font-family:'Nunito',sans-serif; font-size:.75rem; font-weight:800;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--navy);
+  display:block; margin-bottom:6px;
+}
+.form-input-styled, .form-select-styled {
+  width:100%; padding:11px 14px;
+  border:1.5px solid var(--border); border-radius:10px;
+  font-family:'Inter',sans-serif; font-size:.9rem; color:var(--text);
+  background:var(--bg-soft); outline:none; transition:border-color .2s;
+  appearance:none; cursor:pointer;
+}
+.form-input-styled:focus, .form-select-styled:focus { border-color:var(--orange); background:var(--white); }
+.form-input-styled::placeholder { color:var(--muted); opacity:.7; }
+textarea.form-input-styled { resize:none; min-height:80px; }
+
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.form-hint {
+  font-family:'Inter',sans-serif; font-size:.75rem; color:var(--muted);
+  margin-top:6px; display:flex; align-items:center; gap:4px;
+}
+
+/* Service selection */
+.service-option {
+  border:2px solid var(--border); border-radius:10px; padding:14px;
+  margin-bottom:10px; cursor:pointer; transition:all .2s;
+  display:flex; align-items:center; gap:12px;
+}
+.service-option:hover { border-color:var(--orange-bg); background:var(--orange-bg); }
+.service-option.selected {
+  border-color:var(--orange); background:var(--orange-bg);
+  box-shadow:0 0 0 3px rgba(244,81,30,.15);
+}
+.service-option input { display:none; }
+.service-icon {
+  width:44px; height:44px; border-radius:10px; background:var(--white);
+  border:1.5px solid var(--border); display:flex; align-items:center;
+  justify-content:center; font-size:1.4rem; flex-shrink:0;
+}
+.service-info { flex:1; }
+.service-name {
+  font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:800; color:var(--navy);
+}
+.service-desc {
+  font-family:'Inter',sans-serif; font-size:.75rem; color:var(--muted); margin-top:2px;
+}
+.service-price {
+  font-family:'Nunito',sans-serif; font-size:1rem; font-weight:900; color:var(--orange);
+}
+
+/* Color picker */
+.color-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(40px, 1fr)); gap:10px; margin-top:8px; }
+.color-swatch {
+  width:40px; height:40px; border-radius:50%; cursor:pointer;
+  border:3px solid transparent; transition:transform .2s, border-color .2s;
+  position:relative;
+}
+.color-swatch:hover { transform:scale(1.1); }
+.color-swatch.selected { border-color:var(--navy); transform:scale(1.1); }
+.color-swatch.selected::after {
+  content:'✓'; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  color:#fff; font-size:1rem; font-weight:bold; text-shadow:0 1px 2px rgba(0,0,0,.5);
+}
+.color-name { font-family:'Inter',sans-serif; font-size:.7rem; color:var(--muted); text-align:center; margin-top:4px; }
+
+/* Summary */
+.booking-summary-item {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.booking-summary-item:last-child { border-bottom:none; }
+.summary-icon {
+  width:36px; height:36px; border-radius:8px; background:var(--blue-bg);
+  display:flex; align-items:center; justify-content:center; color:var(--blue); font-size:1.1rem;
+}
+.summary-details { flex:1; }
+.summary-label {
+  font-family:'Nunito',sans-serif; font-size:.75rem; font-weight:800; color:var(--muted); text-transform:uppercase;
+}
+.summary-value {
+  font-family:'Inter',sans-serif; font-size:.85rem; font-weight:600; color:var(--text);
+}
+.price-summary { margin-top:16px; padding-top:16px; border-top:2px dashed var(--border); }
+.price-row { display:flex; justify-content:space-between; margin-bottom:8px; font-family:'Inter',sans-serif; font-size:.85rem; }
+.price-total { display:flex; justify-content:space-between; margin-top:12px; padding-top:12px; border-top:1.5px solid var(--border); font-family:'Nunito',sans-serif; font-size:1.2rem; font-weight:900; color:var(--orange); }
+
+.btn-submit {
+  width:100%; padding:14px; border:none; border-radius:10px;
+  color:#fff; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:900;
+  cursor:pointer; margin-top:16px; transition:background .2s, transform .1s;
+  background:var(--orange); box-shadow:0 4px 16px rgba(244,81,30,.3);
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-submit:hover { background:var(--orange-dk); }
+.btn-submit:active { transform:translateY(1px); }
+
+.alert-box {
+  background:var(--orange-bg); border-left:4px solid var(--orange);
+  padding:12px 16px; border-radius:0 8px 8px 0; margin-bottom:16px;
+}
+.alert-box.error { background:#fee2e2; border-color:#dc2626; }
+.alert-box.success { background:#d1fae5; border-color:#059669; }
+
+@media(max-width:900px) {
+  .booking-layout  { flex-direction:column; }
+  .booking-summary { width:100%; position:static; }
+  .form-row { grid-template-columns:1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container-fluid px-4 px-md-5">
+    <h1><i class="bi bi-calendar-check-fill me-2"></i>Book a Service</h1>
+    <p>Schedule your painting service with us. Fill in the details below.</p>
+  </div>
+</div>
+
+<div class="container-fluid px-4 px-md-5">
+  <div class="booking-layout">
+
+    <!-- ══════════════════════════════════════════════════════════
+         LEFT — Booking Form
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="booking-form">
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert-box {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
+      <form method="post" id="bookingForm">
+        {% csrf_token %}
+
+        <!-- Service Selection -->
+        <div class="booking-card">
+          <div class="booking-card-header"><i class="bi bi-brush-fill"></i> Select Service</div>
+          <div class="booking-card-body">
+            <label class="form-label-styled">Service Type</label>
+            <div class="service-options">
+              {% for service in services %}
+              <label class="service-option" data-price="{{ service.price_per_sq }}">
+                <input type="radio" name="service" value="{{ service.service_id }}" required>
+                <div class="service-icon">🎨</div>
+                <div class="service-info">
+                  <div class="service-name">{{ service.service_name }}</div>
+                  <div class="service-desc">{{ service.description|default:"Professional painting service"|truncatechars:50 }}</div>
+                </div>
+                <div class="service-price">₹{{ service.price_per_sq }}/sqft</div>
+              </label>
+              {% empty %}
+              <p style="color:var(--muted);">No services available. Please contact admin.</p>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Area & Date -->
+        <div class="booking-card">
+          <div class="booking-card-header"><i class="bi bi-rulers-fill"></i> Area & Schedule</div>
+          <div class="booking-card-body">
+            <div class="form-row">
+              <div>
+                <label class="form-label-styled">Area (sq.ft) <span style="color:#dc2626">*</span></label>
+                <input type="number" name="area_sqft" class="form-input-styled"
+                       step="0.01" min="1" placeholder="e.g., 150.5" required>
+                <div class="form-hint"><i class="bi bi-calculator"></i> Enter total area to be painted</div>
+              </div>
+              <div>
+                <label class="form-label-styled">Preferred Date <span style="color:#dc2626">*</span></label>
+                <input type="date" name="service_date" class="form-input-styled" required
+                       min="{{ today|date:'Y-m-d' }}">
+                <div class="form-hint"><i class="bi bi-calendar"></i> We'll try to accommodate</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delivery Address -->
+        <div class="booking-card">
+          <div class="booking-card-header"><i class="bi bi-geo-alt-fill"></i> Delivery Address</div>
+          <div class="booking-card-body">
+            <label class="form-label-styled">Complete Address</label>
+            <textarea name="address" class="form-input-styled" rows="3"
+                      placeholder="Full address including landmark" required>{{ customer.address|default:'' }}</textarea>
+            <div class="form-hint"><i class="bi bi-info-circle"></i> Where should we deliver materials and send our team?</div>
+          </div>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="booking-card">
+          <div class="booking-card-header"><i class="bi bi-telephone-fill"></i> Contact Details</div>
+          <div class="booking-card-body">
+            <div class="form-row">
+              <div>
+                <label class="form-label-styled">Phone Number</label>
+                <input type="tel" name="phone" class="form-input-styled"
+                       value="{{ customer.phone|default:'' }}" readonly
+                       title="Phone number from your profile">
+                <div class="form-hint"><i class="bi bi-lock"></i> From your account</div>
+              </div>
+              <div>
+                <label class="form-label-styled">Email</label>
+                <input type="email" name="email" class="form-input-styled"
+                       value="{{ customer.email|default:'' }}" readonly
+                       title="Email from your profile">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         RIGHT — Booking Summary + Submit
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="booking-summary">
+      <div class="booking-card">
+        <div class="booking-card-header"><i class="bi bi-receipt"></i> Booking Summary</div>
+        <div class="booking-card-body">
+
+          <div class="booking-summary-item">
+            <div class="summary-icon">🎨</div>
+            <div class="summary-details">
+              <div class="summary-label">Service</div>
+              <div class="summary-value" id="summaryService">Not selected</div>
+            </div>
+          </div>
+
+          <div class="booking-summary-item">
+            <div class="summary-icon">📐</div>
+            <div class="summary-details">
+              <div class="summary-label">Area</div>
+              <div class="summary-value" id="summaryArea">— sq.ft</div>
+            </div>
+          </div>
+
+          <div class="booking-summary-item">
+            <div class="summary-icon">📅</div>
+            <div class="summary-details">
+              <div class="summary-label">Service Date</div>
+              <div class="summary-value" id="summaryDate">—</div>
+            </div>
+          </div>
+
+          <div class="price-summary">
+            <div class="price-row">
+              <span>Service Rate</span>
+              <span id="rateDisplay">₹0/sq.ft</span>
+            </div>
+            <div class="price-row">
+              <span>Estimated Area</span>
+              <span id="areaDisplay">0 sq.ft</span>
+            </div>
+            <div class="price-total">
+              <span>Estimated Cost</span>
+              <span id="totalDisplay">₹0</span>
+            </div>
+          </div>
+
+          <button type="submit" form="bookingForm" class="btn-submit">
+            <i class="bi bi-calendar-check"></i> Book Now
+          </button>
+
+          <div class="alert-box" style="margin-top:12px;font-size:.8rem;">
+            <i class="bi bi-info-circle"></i> After booking, our team will contact you to confirm the schedule and provide a final quote.
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!-- JavaScript — Dynamic Calculations & Interactions -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<script>
+const servicesData = {
+  {% for service in services %}
+  {{ service.service_id }}: {
+    name: "{{ service.service_name|escapejs }}",
+    price: {{ service.price_per_sq }},
+    description: "{{ service.description|default:''|escapejs }}"
+  }{% if not forloop.last %},{% endif %}
+  {% endfor %}
+};
+
+
+let currentServicePrice = 0;
+
+// Service selection
+document.querySelectorAll('.service-option input').forEach(radio => {
+  radio.addEventListener('change', function() {
+    document.querySelectorAll('.service-option').forEach(opt => opt.classList.remove('selected'));
+    this.closest('.service-option').classList.add('selected');
+
+    const serviceId = parseInt(this.value);
+    updateSummary();
+  });
+});
+
+
+
+// Real-time calculation
+document.querySelectorAll('input[name="area_sqft"], input[name="service_date"]').forEach(input => {
+  input.addEventListener('input', updateSummary);
+});
+
+
+function updateSummary() {
+  // Get selected service
+  const selectedServiceRadio = document.querySelector('input[name="service"]:checked');
+  if (!selectedServiceRadio) {
+    document.getElementById('summaryService').textContent = 'Not selected';
+    currentServicePrice = 0;
+  } else {
+    const serviceId = parseInt(selectedServiceRadio.value);
+    const service = servicesData[serviceId];
+    document.getElementById('summaryService').textContent = service.name;
+    currentServicePrice = service.price;
+  }
+
+  // Get area and calculate total
+  const area = parseFloat(document.querySelector('input[name="area_sqft"]').value) || 0;
+  document.getElementById('summaryArea').textContent = area + ' sq.ft';
+  document.getElementById('areaDisplay').textContent = area + ' sq.ft';
+
+  // Get date
+  const dateInput = document.querySelector('input[name="service_date"]');
+  if (dateInput.value) {
+    const date = new Date(dateInput.value);
+    document.getElementById('summaryDate').textContent = date.toLocaleDateString('en-IN', {
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'
+    });
+  } else {
+    document.getElementById('summaryDate').textContent = '—';
+  }
+
+  // Update pricing
+  const total = currentServicePrice * area;
+  document.getElementById('rateDisplay').textContent = `₹${currentServicePrice.toFixed(0)}/sq.ft`;
+  document.getElementById('totalDisplay').textContent = '₹' + total.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  updateSummary();
+});
+</script>
+{% endblock %}

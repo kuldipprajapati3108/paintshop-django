@@ -1,0 +1,403 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Checkout — Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<style>
+.page-hero { padding:28px 0 24px; }
+.page-hero h1 { font-family:'Nunito',sans-serif; font-size:1.8rem; font-weight:900; margin:0; }
+
+.checkout-layout { display:flex; gap:28px; align-items:flex-start; padding:36px 0 56px; }
+.checkout-form   { flex:1; min-width:0; }
+.checkout-summary{ width:330px; flex-shrink:0; position:sticky; top:70px; }
+
+.checkout-card {
+  background:var(--white); border:1.5px solid var(--border);
+  border-radius:14px; overflow:hidden; margin-bottom:20px;
+}
+.checkout-card-header {
+  background:var(--navy); padding:14px 20px;
+  font-family:'Nunito',sans-serif; font-size:.95rem; font-weight:900; color:#fff;
+  display:flex; align-items:center; gap:8px;
+}
+.checkout-card-body { padding:20px; }
+
+.form-label-styled {
+  font-family:'Nunito',sans-serif; font-size:.75rem; font-weight:800;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--navy);
+  display:block; margin-bottom:6px;
+}
+.form-input-styled {
+  width:100%; padding:11px 14px;
+  border:1.5px solid var(--border); border-radius:10px;
+  font-family:'Inter',sans-serif; font-size:.9rem; color:var(--text);
+  background:var(--bg-soft); outline:none; transition:border-color .2s;
+}
+.form-input-styled:focus { border-color:var(--orange); background:var(--white); }
+textarea.form-input-styled { resize:none; min-height:80px; }
+
+/* ── Payment options ───────────────────────────────────────────── */
+.pay-options { display:flex; gap:12px; flex-wrap:wrap; }
+.pay-option {
+  flex:1; min-width:120px; border:2px solid var(--border); border-radius:10px;
+  padding:14px 16px; cursor:pointer; transition:border-color .2s, background .2s;
+  display:flex; align-items:center; gap:10px;
+}
+.pay-option:has(input:checked) { border-color:var(--orange); background:var(--orange-bg); }
+.pay-option input { accent-color:var(--orange); }
+.pay-option-label { font-family:'Nunito',sans-serif; font-size:.88rem; font-weight:700; color:var(--navy); }
+.pay-icon { font-size:1.3rem; line-height:1; }
+
+/* ── Order items in summary ────────────────────────────────────── */
+.order-item-row {
+  display:flex; align-items:center; gap:12px;
+  padding:10px 0; border-bottom:1px solid var(--border);
+}
+.order-item-row:last-child { border-bottom:none; }
+.order-item-img {
+  width:52px; height:52px; flex-shrink:0; border-radius:8px;
+  background:var(--bg-soft); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; overflow:hidden;
+}
+.order-item-img img { width:100%; height:100%; object-fit:contain; padding:3px; }
+.order-item-name { font-family:'Nunito',sans-serif; font-size:.85rem; font-weight:800; color:var(--navy); }
+.order-item-meta { font-family:'Inter',sans-serif; font-size:.75rem; color:var(--muted); }
+.order-item-price { font-family:'Nunito',sans-serif; font-size:.9rem; font-weight:900; color:var(--orange); margin-left:auto; flex-shrink:0; }
+
+.summary-divider { height:1px; background:var(--border); margin:14px 0; }
+.summary-total-row { display:flex; justify-content:space-between; align-items:center; }
+.summary-total-label { font-family:'Nunito',sans-serif; font-size:1rem; font-weight:900; color:var(--navy); }
+.summary-total-val   { font-family:'Nunito',sans-serif; font-size:1.3rem; font-weight:900; color:var(--orange); }
+
+/* ── Pay button ────────────────────────────────────────────────── */
+.btn-pay {
+  width:100%; padding:14px; border:none; border-radius:10px;
+  color:#fff; font-family:'Nunito',sans-serif; font-size:1rem; font-weight:900;
+  cursor:pointer; margin-top:16px; transition:background .2s;
+  display:flex; align-items:center; justify-content:center; gap:8px;
+}
+.btn-pay-cod       { background:var(--navy); box-shadow:0 4px 16px rgba(13,27,62,.2); }
+.btn-pay-cod:hover { background:#0d1b3e; }
+.btn-pay-rzp       { background:var(--orange); box-shadow:0 4px 16px rgba(244,81,30,.3); }
+.btn-pay-rzp:hover { background:var(--orange-dk); }
+
+/* ── Razorpay badge ────────────────────────────────────────────── */
+.rzp-secure-badge {
+  display:flex; align-items:center; justify-content:center; gap:6px;
+  margin-top:10px; font-family:'Inter',sans-serif; font-size:.72rem; color:var(--muted);
+}
+.rzp-secure-badge i { color:#528FF0; font-size:.85rem; }
+
+@media(max-width:900px) {
+  .checkout-layout  { flex-direction:column; }
+  .checkout-summary { width:100%; position:static; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-hero">
+  <div class="container-fluid px-4 px-md-5">
+    <h1><i class="bi bi-lock-fill me-2" style="color:var(--orange);"></i>Checkout</h1>
+  </div>
+</div>
+
+<div class="container-fluid px-4 px-md-5">
+  <div class="checkout-layout">
+
+    <!-- ══════════════════════════════════════════════════════════
+         LEFT — Address + Payment Method
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="checkout-form">
+
+      <!-- Delivery Address -->
+      <div class="checkout-card">
+        <div class="checkout-card-header"><i class="bi bi-geo-alt-fill"></i> Delivery Address</div>
+        <div class="checkout-card-body">
+          <label class="form-label-styled">Deliver to</label>
+          <textarea id="addressField" class="form-input-styled" rows="3" required>{{ customer.address }}</textarea>
+          <small style="font-family:'Inter',sans-serif;font-size:.75rem;color:var(--muted);margin-top:6px;display:block;">
+            <i class="bi bi-info-circle me-1"></i>Edit if you want delivery to a different address.
+          </small>
+        </div>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="checkout-card">
+        <div class="checkout-card-header"><i class="bi bi-credit-card-fill"></i> Payment Method</div>
+        <div class="checkout-card-body">
+          <div class="pay-options">
+            <label class="pay-option">
+              <input type="radio" name="pay_choice" value="COD" id="payCOD" checked>
+              <span class="pay-icon">💵</span>
+              <span class="pay-option-label">Cash on Delivery</span>
+            </label>
+            <label class="pay-option">
+              <input type="radio" name="pay_choice" value="UPI" id="payUPI">
+              <span class="pay-icon">📱</span>
+              <span class="pay-option-label">UPI</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Apply Offer -->
+      {% if available_offers %}
+      <div class="checkout-card">
+        <div class="checkout-card-header"><i class="bi bi-tag-fill"></i> Apply Offer</div>
+        <div class="checkout-card-body">
+          <label class="form-label-styled" for="offerSelect">Select an offer</label>
+          <select id="offerSelect" class="form-input-styled" onchange="applyOffer()">
+            <option value="">— No offer —</option>
+            {% for offer in available_offers %}
+            <option value="{{ offer.offer_id }}"
+                    data-pct="{{ offer.discount_percent }}"
+                    data-min="{{ offer.min_order_amount }}">
+              {{ offer.offer_name }} — {{ offer.discount_percent }}% off
+              (min ₹{{ offer.min_order_amount }})
+            </option>
+            {% endfor %}
+          </select>
+          <div id="offerMsg" style="margin-top:8px;font-size:.82rem;font-family:'Inter',sans-serif;
+               color:#2e7d32;display:none;font-weight:600;">
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
+         RIGHT — Order Summary + Pay Button
+    ══════════════════════════════════════════════════════════════ -->
+    <div class="checkout-summary">
+      <div class="checkout-card">
+        <div class="checkout-card-header"><i class="bi bi-receipt"></i> Order Summary</div>
+        <div class="checkout-card-body">
+
+          {% for item in items %}
+          <div class="order-item-row">
+            <div class="order-item-img">
+              {% if item.product.primary_image %}
+                <img src="/media/{{ item.product.primary_image }}" alt="{{ item.product.product_name }}">
+              {% else %}
+                <i class="bi bi-image text-secondary"></i>
+              {% endif %}
+            </div>
+            <div>
+              <div class="order-item-name">{{ item.product.product_name }}</div>
+              <div class="order-item-meta">
+                Qty: {{ item.quantity }}
+                {% if item.variant %}&nbsp;·&nbsp;
+                  <span style="font-weight:700;color:var(--navy);">{{ item.variant.label }}</span>
+                {% endif %}
+                {% if item.color %}&nbsp;·&nbsp;
+                  <span style="display:inline-block;width:10px;height:10px;border-radius:50%;
+                    background:{{ item.color.color_code }};border:1px solid #ccc;"></span>
+                  {{ item.color.color_name }}
+                {% endif %}
+              </div>
+            </div>
+            <div class="order-item-price">₹{{ item.subtotal }}</div>
+          </div>
+          {% endfor %}
+
+          <div class="summary-divider"></div>
+
+          <!-- Subtotal row -->
+          <div class="summary-total-row" style="margin-bottom:6px;">
+            <span style="font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;color:var(--muted);">Subtotal</span>
+            <span style="font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;color:var(--muted);">₹{{ subtotal }}</span>
+          </div>
+
+          <!-- Discount row (hidden until offer applied) -->
+          <div class="summary-total-row" id="discountRow" style="display:none;margin-bottom:6px;">
+            <span style="font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;color:#2e7d32;">
+              <i class="bi bi-tag-fill me-1"></i>Discount
+            </span>
+            <span id="discountVal" style="font-family:'Nunito',sans-serif;font-size:.9rem;font-weight:700;color:#2e7d32;"></span>
+          </div>
+
+          <div class="summary-divider"></div>
+
+          <!-- Final total -->
+          <div class="summary-total-row">
+            <span class="summary-total-label">Total</span>
+            <span class="summary-total-val" id="totalVal">₹{{ subtotal }}</span>
+          </div>
+
+          <!-- ── COD form (plain POST) ── -->
+          <form method="post" action="{% url 'checkout' %}" id="codForm">
+            {% csrf_token %}
+            <input type="hidden" name="payment_method" value="COD">
+            <input type="hidden" name="address" id="codAddress">
+            <input type="hidden" name="offer_id" id="codOfferId">
+            <button type="submit" class="btn-pay btn-pay-cod" id="btnCOD">
+              <i class="bi bi-bag-check-fill"></i> Place Order (Pay on Delivery)
+            </button>
+          </form>
+
+          <!-- ── Razorpay button (shown when UPI/Card selected) ── -->
+          {% if razorpay_order_id %}
+          <button type="button" class="btn-pay btn-pay-rzp" id="btnRzp" style="display:none;" onclick="openRazorpay()">
+            <i class="bi bi-credit-card-fill"></i> Pay <span id="rzpBtnAmt">₹{{ subtotal }}</span> Securely
+          </button>
+          <div class="rzp-secure-badge" id="rzpBadge" style="display:none;">
+            <i class="bi bi-shield-lock-fill"></i> Secured by Razorpay
+          </div>
+          {% endif %}
+
+          <!-- Hidden form submitted after Razorpay success -->
+          <form method="post" action="{% url 'payment_verify' %}" id="rzpForm" style="display:none;">
+            {% csrf_token %}
+            <input type="hidden" name="razorpay_payment_id" id="rzp_payment_id">
+            <input type="hidden" name="razorpay_order_id"   id="rzp_order_id"   value="{{ razorpay_order_id }}">
+            <input type="hidden" name="razorpay_signature"  id="rzp_signature">
+            <input type="hidden" name="payment_method"      id="rzp_method"     value="UPI">
+            <input type="hidden" name="offer_id"            id="rzpOfferId">
+            <input type="hidden" name="address"             id="rzpAddress">
+          </form>
+
+          {% if not is_buy_now %}
+          <a href="{% url 'cart' %}" style="display:block;text-align:center;margin-top:12px;
+            font-family:'Nunito',sans-serif;font-size:.82rem;font-weight:700;
+            color:var(--muted);text-decoration:none;">
+            <i class="bi bi-arrow-left me-1"></i> Back to Cart
+          </a>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Razorpay JS + logic ──────────────────────────────────────── -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+const RZP_ORDER_ID = "{{ razorpay_order_id|default:'' }}";
+const RZP_KEY      = "{{ razorpay_key_id }}";
+const SUBTOTAL     = {{ subtotal }};
+
+// Current live totals (updated when offer is applied)
+let currentDiscountPaise = 0;
+let currentTotalPaise    = Math.round(SUBTOTAL * 100);
+
+// ── Offer logic ─────────────────────────────────────────────────
+function applyOffer() {
+  const sel  = document.getElementById('offerSelect');
+  const opt  = sel ? sel.options[sel.selectedIndex] : null;
+  const msg  = document.getElementById('offerMsg');
+  const dRow = document.getElementById('discountRow');
+  const dVal = document.getElementById('discountVal');
+  const tVal = document.getElementById('totalVal');
+  const rzpAmt = document.getElementById('rzpBtnAmt');
+
+  if (!opt || !opt.value) {
+    // No offer selected — reset
+    if (dRow) dRow.style.display = 'none';
+    if (tVal) tVal.textContent = '₹' + SUBTOTAL.toFixed(2);
+    if (rzpAmt) rzpAmt.textContent = '₹' + SUBTOTAL.toFixed(2);
+    if (msg) msg.style.display = 'none';
+    currentDiscountPaise = 0;
+    currentTotalPaise    = Math.round(SUBTOTAL * 100);
+    syncOfferToForms('');
+    return;
+  }
+
+  const pct      = parseFloat(opt.dataset.pct);
+  const discount = Math.round(SUBTOTAL * pct) / 100;   // 2 dp
+  const total    = +(SUBTOTAL - discount).toFixed(2);
+
+  currentDiscountPaise = Math.round(discount * 100);
+  currentTotalPaise    = Math.round(total * 100);
+
+  if (dVal) dVal.textContent = '− ₹' + discount.toFixed(2);
+  if (dRow) dRow.style.display = 'flex';
+  if (tVal) tVal.textContent = '₹' + total.toFixed(2);
+  if (rzpAmt) rzpAmt.textContent = '₹' + total.toFixed(2);
+  if (msg) {
+    msg.textContent = '✓ ' + opt.text.split('—')[0].trim() + ' applied!';
+    msg.style.display = 'block';
+  }
+  syncOfferToForms(opt.value);
+}
+
+function syncOfferToForms(offerId) {
+  const codField = document.getElementById('codOfferId');
+  const rzpField = document.getElementById('rzpOfferId');
+  if (codField) codField.value = offerId;
+  if (rzpField) rzpField.value = offerId;
+}
+
+// ── Payment method toggle ────────────────────────────────────────
+document.querySelectorAll('input[name="pay_choice"]').forEach(function(radio) {
+  radio.addEventListener('change', function() {
+    const isCOD = this.value === 'COD';
+    document.getElementById('codForm').style.display  = isCOD ? 'block' : 'none';
+    document.getElementById('btnCOD').style.display   = isCOD ? 'flex'  : 'none';
+
+    const rzpAvailable = RZP_ORDER_ID !== '';
+    const btnRzp   = document.getElementById('btnRzp');
+    const rzpBadge = document.getElementById('rzpBadge');
+    if (btnRzp)   btnRzp.style.display   = (!isCOD && rzpAvailable) ? 'flex' : 'none';
+    if (rzpBadge) rzpBadge.style.display = (!isCOD && rzpAvailable) ? 'flex' : 'none';
+
+    if (document.getElementById('rzp_method')) {
+      document.getElementById('rzp_method').value = this.value;
+    }
+  });
+});
+
+// ── Sync address + offer on COD submit ──────────────────────────
+document.getElementById('codForm').addEventListener('submit', function() {
+  document.getElementById('codAddress').value = document.getElementById('addressField').value;
+});
+
+// ── Razorpay ─────────────────────────────────────────────────────
+function openRazorpay() {
+  if (!RZP_ORDER_ID) {
+    alert('Online payment is unavailable right now. Please use Cash on Delivery.');
+    return;
+  }
+  var options = {
+    key:         RZP_KEY,
+    amount:      currentTotalPaise,   // discounted amount sent to Razorpay
+    currency:    'INR',
+    name:        'Shree Shankar Traders',
+    description: 'Order Payment',
+    order_id:    RZP_ORDER_ID,
+    handler: function(response) {
+      document.getElementById('rzp_payment_id').value = response.razorpay_payment_id;
+      document.getElementById('rzp_order_id').value   = response.razorpay_order_id;
+      document.getElementById('rzp_signature').value  = response.razorpay_signature;
+      // sync delivery address before submitting
+      var addrEl = document.getElementById('addressField');
+      if (addrEl) document.getElementById('rzpAddress').value = addrEl.value;
+      document.getElementById('rzpForm').submit();
+    },
+    prefill: {
+      name:    "{{ customer.cust_name }}",
+      email:   "{{ customer.email }}",
+      contact: "{{ customer.phone }}"
+    },
+    notes: {
+      address: document.getElementById('addressField') ?
+               document.getElementById('addressField').value : ''
+    },
+    theme: { color: '#F4511E' },
+    modal: {
+      ondismiss: function() {
+        console.log('Payment popup closed by user.');
+      }
+    }
+  };
+  var rzp = new Razorpay(options);
+  rzp.on('payment.failed', function(response) {
+    alert('Payment failed: ' + response.error.description + '\nPlease try again or use Cash on Delivery.');
+  });
+  rzp.open();
+}
+</script>
+{% endblock %}

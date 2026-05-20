@@ -1,0 +1,237 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Shree Shankar Traders{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'home.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+  <div class="carousel-indicators">
+    <button data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+    <button data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+    <button data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
+  </div>
+
+  <div class="carousel-inner">
+    <div class="carousel-item active">
+      <div class="hero-slide">
+        <img src="{% static 'images/banner1.jpg' %}" alt="Banner 1">
+        <div class="hero-overlay">
+          <div class="hero-content">
+            <div class="hero-tag">Premium Paints &amp; Hardware</div>
+            <h1 class="hero-title">Transform Your<br><span>Space with Color</span></h1>
+            <p class="hero-sub">Trusted by homeowners and contractors across Ahmedabad.<br>Quality products at honest prices.</p>
+            <a href="{% url 'product_list' %}" class="hero-cta">Explore Products <i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="carousel-item">
+      <div class="hero-slide">
+        <img src="{% static 'images/banner2.jpg' %}" alt="Banner 2">
+        <div class="hero-overlay">
+          <div class="hero-content">
+            <div class="hero-tag">Professional Services</div>
+            <h1 class="hero-title">Expert Painting<br><span>Done Right</span></h1>
+            <p class="hero-sub">From walls to waterproofing — our skilled team delivers flawless results every time.</p>
+            <a href="#services" class="hero-cta">Our Services <i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="carousel-item">
+      <div class="hero-slide">
+        <img src="{% static 'images/banner3.jpg' %}" alt="Banner 3">
+        <div class="hero-overlay">
+          <div class="hero-content">
+            <div class="hero-tag">Trusted Since Day One</div>
+            <h1 class="hero-title">Premium Brands,<br><span>Best Prices</span></h1>
+            <p class="hero-sub">Asian Paints, Berger and more — all under one roof in Isanpur, Ahmedabad.</p>
+            <a href="#aboutUs" class="hero-cta">Find Us <i class="bi bi-arrow-right"></i></a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+    <span class="carousel-control-prev-icon" aria-hidden = "true"></span>
+  </button>
+  <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+  </button>
+</div>
+
+
+<section class="home-section products-section fade-in">
+  <div class="container-fluid px-4 px-md-5">
+    <div class="d-flex justify-content-between align-items-end mb-5">
+      <div>
+        <div class="section-label">What we carry</div>
+        <h2 class="section-title">Featured Products</h2>
+        <div class="blue-line"></div>
+      </div>
+      <a href="{% url 'product_list' %}" class="view-all d-none d-md-inline-flex">
+        View All <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="row g-4">
+      {% for product in products %}
+      <div class="col-6 col-md-3">
+        <div class="product-card">
+          <div class="product-img-wrap">
+            {% if product.primary_image %}
+              <img src="/media/{{ product.primary_image }}" alt="{{ product.product_name }}">
+            {% else %}
+              <i class="bi bi-image text-secondary fs-1"></i>
+            {% endif %}
+          </div>
+          <div class="product-body">
+            <div class="product-name">{{ product.product_name }}</div>
+            <div class="product-price">₹{{ product.price }}</div>
+            <a href="{% url 'product_detail' product.product_id %}" class="btn-product">View Details</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center text-muted">No products available yet.</div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-5 d-md-none">
+      <a href="{% url 'product_list' %}" class="view-all">View All Products <i class="bi bi-arrow-right"></i></a>
+    </div>
+  </div>
+</section>
+
+<hr class="gold-divider">
+
+<section class="home-section services-section fade-in" id="services">
+  <div class="container-fluid px-4 px-md-5">
+    <div class="mb-5">
+      <div class="section-label">What we offer</div>
+      <h2 class="section-title">Our Services</h2>
+      <div class="blue-line"></div>
+    </div>
+
+    <div class="row g-4">
+      {% for service in services %}
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="service-card">
+          <div class="service-icon"><i class="bi bi-brush"></i></div>
+          <div class="service-name">{{ service.service_name }}</div>
+          {% if service.description %}
+          <div class="service-desc">{{ service.description }}</div>
+          {% endif %}
+          <div class="service-rate">₹{{ service.price_per_sq }} / sq.ft</div>
+          <a href="{% url 'login' %}" class="btn-service">
+            Book Now <i class="bi bi-arrow-right"></i>
+          </a>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12 text-center" style="color:rgba(255,255,255,.5);">No services listed yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<hr class="gold-divider">
+
+<section class="home-section about-section fade-in" id="aboutUs">
+  <div class="container-fluid px-4 px-md-5">
+    <div class="row g-5 align-items-start">
+
+      <div class="col-12 col-lg-4">
+        <div class="about-card">
+          <div class="section-label mb-3">Find Us</div>
+          <h3 style="font-family:'Nunito',sans-serif; font-weight:900; font-size:1.5rem; color:var(--navy); margin-bottom:1.5rem;">
+            Get in Touch
+          </h3>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="bi bi-geo-alt-fill"></i></div>
+            <div>
+              <div class="contact-label">Address</div>
+              <div class="contact-value">Shop No.9, Ambicanagar,<br>Isanpur — 382443</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="bi bi-telephone-fill"></i></div>
+            <div>
+              <div class="contact-label">Call Us</div>
+              <div class="contact-value">+91 98249 93188</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="bi bi-envelope-fill"></i></div>
+            <div>
+              <div class="contact-label">Email</div>
+              <div class="contact-value">shreeshankartraders@gmail.com</div>
+            </div>
+          </div>
+          <div class="contact-item">
+            <div class="contact-icon"><i class="bi bi-clock-fill"></i></div>
+            <div>
+              <div class="contact-label">Timings</div>
+              <div class="contact-value">
+                Mon – Sat &nbsp;9:00 AM – 10:00 PM<br>
+                <span style="color:var(--muted);">Sunday: Closed</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-8">
+        <div class="section-label">Who we are</div>
+        <h2 class="section-title mb-4">About Shree Shankar Traders</h2>
+        <div class="blue-line mb-5"></div>
+        <p class="about-text mb-4">
+          We are a <strong>trusted paint and hardware supplier</strong> located in Ahmedabad City,
+          providing high-quality products at affordable prices. For over a decade, homeowners,
+          businesses, and professional contractors have relied on us for everything from
+          interior emulsions to heavy-duty waterproofing solutions.
+        </p>
+        <p class="about-text mb-5">
+          At Shree Shankar Traders, our commitment to <strong>quality, durability, and customer
+          satisfaction</strong> is at the heart of everything we do. We stock leading brands and offer
+          professional painting services — making us your <strong>one-stop destination</strong> for
+          all things paint and hardware in Ahmedabad.
+        </p>
+        <div class="row g-3">
+          <div class="col-6 col-sm-3">
+            <div class="mini-badge"><i class="bi bi-patch-check-fill"></i><span>Genuine Products</span></div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="mini-badge"><i class="bi bi-truck"></i><span>Home Delivery</span></div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="mini-badge"><i class="bi bi-headset"></i><span>Expert Advice</span></div>
+          </div>
+          <div class="col-6 col-sm-3">
+            <div class="mini-badge"><i class="bi bi-tags"></i><span>Best Prices</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+  const obs = new IntersectionObserver(
+    entries => entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    }),
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+
+{% endblock %}

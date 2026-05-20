@@ -1,0 +1,163 @@
+{% url 'admin_dashboard' as dashboard_url %}
+
+
+<p class="sidebar-section-label">Overview</p>
+<ul class="sidebar-nav">
+  <li>
+    <a href="{{ dashboard_url }}"
+       class="{% if request.path == dashboard_url %}active{% endif %}">
+      <i class="bi bi-speedometer2"></i>
+      Dashboard
+    </a>
+  </li>
+</ul>
+
+<p class="sidebar-section-label">Catalogue</p>
+<ul class="sidebar-nav">
+  <li>
+    <a href="/admin_panel/categories/"
+       class="{% if 'categories' in request.path %}active{% endif %}">
+      <i class="bi bi-tags"></i> Categories
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/brands/"
+       class="{% if 'brands' in request.path %}active{% endif %}">
+      <i class="bi bi-shop"></i> Brands
+    </a>
+  </li>
+  <li>
+  <li>
+    <a href="/admin_panel/products/"
+       class="{% if 'products' in request.path %}active{% endif %}">
+      <i class="bi bi-box-seam"></i> Products
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/product_image/"
+       class="{% if 'product_image' in request.path %}active{% endif %}">
+      <i class="bi bi-image"></i> Product Images
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/product_variants/"
+       class="{% if 'product_variants' in request.path %}active{% endif %}">
+      <i class="bi bi-box-seam"></i> Product Variants
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/colors/"
+       class="{% if 'colors' in request.path and 'product_color' not in request.path  %}active{% endif %}">
+      <i class="bi bi-palette"></i> Colors
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/product_colors/"
+       class="{% if 'product_color' in request.path %}active{% endif %}">
+      <i class="bi bi-palette"></i> Product Colors
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/offers/"
+       class="{% if 'offers' in request.path %}active{% endif %}">
+      <i class="bi bi-percent"></i> Offers
+    </a>
+  </li>
+</ul>
+
+
+<p class="sidebar-section-label">Operations</p>
+<ul class="sidebar-nav">
+  <li>
+    <a href="/admin_panel/orders/"
+       class="{% if 'orders' in request.path and 'order_item' not in request.path %}active{% endif %}">
+      <i class="bi bi-cart3"></i> Orders
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/deliveries/"
+       class="{% if 'deliveries' in request.path %}active{% endif %}">
+      <i class="bi bi-truck"></i> Deliveries
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/payments/"
+       class="{% if 'payments' in request.path %}active{% endif %}">
+      <i class="bi bi-credit-card"></i> Payments
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/invoices/"
+       class="{% if 'invoices' in request.path %}active{% endif %}">
+      <i class="bi bi-receipt"></i> Invoices
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/services/"
+       class="{% if 'services' in request.path %}active{% endif %}">
+      <i class="bi bi-brush"></i> Services
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/bookings/"
+       class="{% if 'bookings' in request.path %}active{% endif %}">
+      <i class="bi bi-calendar-check"></i> Bookings
+    </a>
+  </li>
+</ul>
+
+<p class="sidebar-section-label">People</p>
+<ul class="sidebar-nav">
+  <li>
+    <a href="/admin_panel/users/"
+       class="{% if 'users' in request.path %}active{% endif %}">
+      <i class="bi bi-people"></i> Users
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/customers/"
+       class="{% if 'customers' in request.path %}active{% endif %}">
+      <i class="bi bi-people"></i> Customers
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/staff/"
+       class="{% if 'staff' in request.path %}active{% endif %}">
+      <i class="bi bi-person-badge"></i> Staff
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/feedbacks/"
+       class="{% if 'feedbacks' in request.path %}active{% endif %}">
+      <i class="bi bi-chat-left-text"></i> Feedback
+    </a>
+  </li>
+</ul>
+
+<p class="sidebar-section-label">Reports</p>
+<ul class="sidebar-nav">
+  <li>
+    <a href="/admin_panel/reports/"
+       class="{% if request.path == '/admin_panel/reports/' %}active{% endif %}">
+      <i class="bi bi-file-earmark-bar-graph"></i> Reports Dashboard
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/reports/customers/"
+       class="{% if 'reports/customers' in request.path %}active{% endif %}">
+      <i class="bi bi-people"></i> Customer Report
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/reports/orders/"
+       class="{% if 'reports/orders' in request.path %}active{% endif %}">
+      <i class="bi bi-cart3"></i> Order Report
+    </a>
+  </li>
+  <li>
+    <a href="/admin_panel/reports/bookings/"
+       class="{% if 'reports/bookings' in request.path %}active{% endif %}">
+      <i class="bi bi-calendar-check"></i> Booking Report
+    </a>
+  </li>
+</ul>
